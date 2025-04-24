@@ -82,7 +82,7 @@ let yaw = 0;
   panels.forEach((p, i) => {
     const rel = (slice * i + yaw) % 360;         // facing angle
     const rad = rel * Math.PI / 180;
-    const op  = Math.pow(Math.max(0, Math.cos(rad)), 2);  // cos² fade
+    const op  = Math.pow(Math.max(0, Math.cos(rad)), 3);  // cos² fade
     p.style.opacity = op;
   });
 
