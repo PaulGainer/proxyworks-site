@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ProxyWorks 3-D Logo Ring – drag to spin</title>
+
+<style>
+/* ── RESET ─────────────────────────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;font:inherit}
+
+/* ── LAYOUT & COLOUR ───────────────────────────────────────────── */
+body{
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;background:#101f24;overflow:hidden;color:#fff;
+  padding-inline:clamp(24px,8vw,80px);
+  user-select:none;                     /* no accidental text selection */
+}
+
+/* ── CAMERA ────────────────────────────────────────────────────── */
+.scene{perspective:1200px;}
+
+/* ── RING ──────────────────────────────────────────────────────── */
+.ring{
+  position:relative;width:320px;height:320px;
+  transform-style:preserve-3d;transform-origin:center;
+  cursor:grab;touch-action:none;        /* mobile: disable native pan */
+}
+.ring.dragging{cursor:grabbing}
+
+/* ── PANELS ────────────────────────────────────────────────────── */
+.panel{position:absolute;inset:0;transform-style:preserve-3d;}
+.panel img{
+  width:100%;height:100%;object-fit:contain;
+  backface-visibility:hidden;
+  pointer-events:none;user-drag:none;   /* stop ghost-drag */
+}
+</style>
+</head>
+
+<body>
+ <div class="scene">
+  <div class="ring" id="ring">
+    <!-- duplicate or swap logos as needed -->
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+  </div>
+ </div>
+
+<script>
+/********************************************************************
+ * Config – tweak to taste
+ ********************************************************************/
+const RADIUS            = 350;   // distance logo plane → centre (px)
+const FULL_SWIPE_DEG    = 180;   // ⬅ screen-width drag = this many degrees
+const MIN_SCALE         = 0.3;   // size at extreme sides / back
+const MAX_SCALE         = 1.4;   // size when dead-centre (dramatic “pop”)
+const FADE_EXPONENT     = 2;     // cos^exp  (larger = narrower bright zone)
+/********************************************************************/
+
+const ring   = document.getElementById('ring');
+const panels = [...ring.children];
+const total  = panels.length;
+const slice  = 360 / total;
+
+/* ── Initial placement ────────────────────────────────────────── */
+panels.forEach((p,i)=>{ p.dataset.base = slice*i; });
+
+/* ── Drag state ───────────────────────────────────────────────── */
+let yaw = 0, dragging=false, startX=0, startYaw=0, viewportW=innerWidth;
+
+/* ── Render helper ────────────────────────────────────────────── */
+function render(){
+  ring.style.transform = `rotateY(${yaw}deg)`;
+  panels.forEach(p=>{
+    const base = +p.dataset.base;
+    const rel  = (base + yaw) % 360;
+    const rad  = rel * Math.PI/180;
+    const vis  = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+    const scl  = MIN_SCALE + (MAX_SCALE-MIN_SCALE)*vis;
+
+    p.style.opacity   = vis;
+    p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+  });
+}
+
+/* ── Pointer events (mouse / touch / pen) ─────────────────────── */
+ring.addEventListener('pointerdown', e=>{
+  dragging  = true;
+  startX    = e.clientX;
+  startYaw  = yaw;
+  viewportW = innerWidth || document.documentElement.clientWidth;
+  ring.classList.add('dragging');
+  ring.setPointerCapture(e.pointerId);
+});
+
+ring.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const dx = e.clientX - startX;          // px dragged
+  yaw = (startYaw + (dx / viewportW) * FULL_SWIPE_DEG) % 360;
+  render();
+});
+
+function endDrag(){ dragging=false; ring.classList.remove('dragging'); }
+ring.addEventListener('pointerup',      endDrag);
+ring.addEventListener('pointercancel',  endDrag);
+
+/* ── Initial draw ─────────────────────────────────────────────── */
+render();
+</script>
+</body>
+</html>
