@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 90vw;
+      max-width: 600px;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .box {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      cursor: grab;
+    }
+
+    .box span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: center;
+      transform-style: preserve-3d;
+      transition: opacity 0.2s linear;
+    }
+
+    .box span img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      backface-visibility: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 90vw;
+        max-width: 90vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="box" id="rotatingBox">
+      <!-- Add as many images as you like -->
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+      <span><img src="images/logo.png" /></span>
+    </div>
+  </div>
+
+  <script>
+    const box = document.getElementById("rotatingBox");
+    const spans = box.querySelectorAll("span");
+    const total = spans.length;
+    const radius = 300; // can tweak if needed
+
+    let rotationY = 0;
+    let autoRotate = true;
+
+    // Position each image in a circle
+    spans.forEach((span, i) => {
+      span.dataset.baseAngle = (360 / total) * i;
+    });
+
+    function updateTransforms() {
+      spans.forEach(span => {
+        const baseAngle = parseFloat(span.dataset.baseAngle);
+        const worldAngle = (baseAngle + rotationY) % 360;
+        const angleFromViewer = ((worldAngle + 360) % 360);
+        const angleToFront = Math.min(
+          Math.abs(angleFromViewer),
+          Math.abs(360 - angleFromViewer)
+        );
+        const radians = (angleToFront * Math.PI) / 180;
+        const fade = Math.cos(radians);
+        const opacity = Math.max(0, fade);
+
+        span.style.opacity = opacity;
+        span.style.transform = `rotateY(${baseAngle}deg) translateZ(${radius}px)`;
+      });
+
+      box.style.transform = `rotateY(${rotationY}deg)`;
+    }
+
+    function animate() {
+      if (autoRotate) {
+        rotationY += 0.4;
+        updateTransforms();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Drag-to-rotate
+    let isDragging = false;
+    let lastX = 0;
+    let velocity = 0;
+
+    function onStart(e) {
+      autoRotate = false;
+      isDragging = true;
+      lastX = e.touches ? e.touches[0].clientX : e.clientX;
+      box.style.cursor = "grabbing";
+    }
+
+    function onMove(e) {
+      if (!isDragging) return;
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const delta = x - lastX;
+      lastX = x;
+      rotationY += delta * 0.5;
+      velocity = delta * 0.5;
+      updateTransforms();
+    }
+
+    function onEnd() {
+      isDragging = false;
+      box.style.cursor = "grab";
+
+      // Continue spinning slightly on release
+      let inertia = velocity;
+      function decay() {
+        if (Math.abs(inertia) < 0.1) {
+          autoRotate = true;
+          return;
+        }
+        rotationY += inertia;
+        inertia *= 0.95;
+        updateTransforms();
+        requestAnimationFrame(decay);
+      }
+      decay();
+    }
+
+    box.addEventListener("mousedown", onStart);
+    box.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+
+    box.addEventListener("touchstart", onStart, { passive: true });
+    box.addEventListener("touchmove", onMove, { passive: true });
+    document.addEventListener("touchend", onEnd);
+  </script>
+</body>
+</html>
