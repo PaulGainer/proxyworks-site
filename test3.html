@@ -14,26 +14,20 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
       background: #000;
       overflow: hidden;
     }
 
-    .container {
-      width: 90vw;
-      max-width: 600px;
-      height: auto;
-      aspect-ratio: 1 / 1;
-      position: relative;
-      perspective: 1000px;
-    }
-
     .box {
-      width: 100%;
-      height: 100%;
       position: relative;
+      width: 80vw;
+      max-width: 400px;
+      height: 80vw;
+      max-height: 400px;
       transform-style: preserve-3d;
-      cursor: grab;
+      perspective: 1000px;
+      touch-action: none; /* Prevents scroll conflicts */
     }
 
     .box span {
@@ -45,6 +39,7 @@
       transform-origin: center;
       transform-style: preserve-3d;
       transition: opacity 0.2s linear;
+      pointer-events: none;
     }
 
     .box span img {
@@ -53,123 +48,83 @@
       object-fit: contain;
       backface-visibility: hidden;
     }
-
-    @media (max-width: 600px) {
-      .container {
-        width: 90vw;
-        max-width: 90vw;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="box" id="rotatingBox">
-      <!-- Add as many images as you like -->
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-      <span><img src="images/logo.png" /></span>
-    </div>
+  <div class="box" id="rotatingBox">
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
   </div>
 
   <script>
     const box = document.getElementById("rotatingBox");
     const spans = box.querySelectorAll("span");
     const total = spans.length;
-    const radius = 300; // can tweak if needed
+    const radius = 500;
 
     let rotationY = 0;
-    let autoRotate = true;
+    let isDragging = false;
+    let startX = 0;
+    let lastRotationY = 0;
 
-    // Position each image in a circle
-    spans.forEach((span, i) => {
-      span.dataset.baseAngle = (360 / total) * i;
-    });
-
-    function updateTransforms() {
-      spans.forEach(span => {
-        const baseAngle = parseFloat(span.dataset.baseAngle);
+    // Position the spans in a 3D circle
+    function updatePositions() {
+      spans.forEach((span, i) => {
+        const baseAngle = (360 / total) * i;
         const worldAngle = (baseAngle + rotationY) % 360;
-        const angleFromViewer = ((worldAngle + 360) % 360);
-        const angleToFront = Math.min(
-          Math.abs(angleFromViewer),
-          Math.abs(360 - angleFromViewer)
+        const angleToViewer = Math.min(
+          Math.abs(worldAngle),
+          Math.abs(360 - worldAngle)
         );
-        const radians = (angleToFront * Math.PI) / 180;
+        const radians = angleToViewer * (Math.PI / 180);
         const fade = Math.cos(radians);
         const opacity = Math.max(0, fade);
-
         span.style.opacity = opacity;
         span.style.transform = `rotateY(${baseAngle}deg) translateZ(${radius}px)`;
       });
 
-      box.style.transform = `rotateY(${rotationY}deg)`;
+      box.style.transform = `perspective(1000px) rotateY(${rotationY}deg)`;
     }
 
-    function animate() {
-      if (autoRotate) {
-        rotationY += 0.4;
-        updateTransforms();
-      }
-      requestAnimationFrame(animate);
-    }
+    updatePositions();
 
-    animate();
+    // --- DRAG CONTROLS ---
 
-    // Drag-to-rotate
-    let isDragging = false;
-    let lastX = 0;
-    let velocity = 0;
-
-    function onStart(e) {
-      autoRotate = false;
+    function startDrag(x) {
       isDragging = true;
-      lastX = e.touches ? e.touches[0].clientX : e.clientX;
-      box.style.cursor = "grabbing";
+      startX = x;
     }
 
-    function onMove(e) {
+    function drag(x) {
       if (!isDragging) return;
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      const delta = x - lastX;
-      lastX = x;
-      rotationY += delta * 0.5;
-      velocity = delta * 0.5;
-      updateTransforms();
+      const delta = x - startX;
+      rotationY = lastRotationY + delta * 0.3; // control sensitivity
+      updatePositions();
     }
 
-    function onEnd() {
+    function endDrag() {
       isDragging = false;
-      box.style.cursor = "grab";
-
-      // Continue spinning slightly on release
-      let inertia = velocity;
-      function decay() {
-        if (Math.abs(inertia) < 0.1) {
-          autoRotate = true;
-          return;
-        }
-        rotationY += inertia;
-        inertia *= 0.95;
-        updateTransforms();
-        requestAnimationFrame(decay);
-      }
-      decay();
+      lastRotationY = rotationY;
     }
 
-    box.addEventListener("mousedown", onStart);
-    box.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onEnd);
+    // Mouse events
+    box.addEventListener("mousedown", (e) => startDrag(e.clientX));
+    window.addEventListener("mousemove", (e) => drag(e.clientX));
+    window.addEventListener("mouseup", endDrag);
 
-    box.addEventListener("touchstart", onStart, { passive: true });
-    box.addEventListener("touchmove", onMove, { passive: true });
-    document.addEventListener("touchend", onEnd);
+    // Touch events
+    box.addEventListener("touchstart", (e) => startDrag(e.touches[0].clientX));
+    window.addEventListener("touchmove", (e) => {
+      drag(e.touches[0].clientX);
+    });
+    window.addEventListener("touchend", endDrag);
   </script>
 </body>
 </html>
