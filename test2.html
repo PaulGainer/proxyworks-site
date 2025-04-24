@@ -64,31 +64,30 @@
     const total = spans.length;
     const radius = 400;
 
-    let rotation = 0; // in degrees
-
-    // Position spans in a circle
-    spans.forEach((span, i) => {
-      span.dataset.index = i;
-    });
+    let rotationY = 0;
 
     function animate() {
-      rotation += 0.2; // Adjust speed
-      box.style.transform = `perspective(1000px) rotateY(${rotation}deg)`;
+      rotationY += 0.5;
+      box.style.transform = `perspective(1000px) rotateY(${rotationY}deg)`;
 
       spans.forEach((span, i) => {
-        const angle = (360 / total) * i;
-        const currentAngle = (angle + rotation) % 360;
-        const relativeAngle = (currentAngle + 360) % 360;
+        const baseAngle = (360 / total) * i;
+        const worldAngle = (baseAngle + rotationY) % 360;
 
-        // Position each span
-        span.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+        // Calculate how directly this image faces the camera
+        const angleFromViewer = ((worldAngle + 360) % 360);
+        const angleToFront = Math.min(
+          Math.abs(angleFromViewer),
+          Math.abs(360 - angleFromViewer)
+        );
+        const radians = (angleToFront * Math.PI) / 180;
 
-        // Fade based on angle — cosine curve (max at 0°, min at 90°/270°)
-        const radians = (relativeAngle * Math.PI) / 180;
-        const fadeFactor = Math.cos(radians);
-        const opacity = Math.max(0, fadeFactor); // clamp negative values
+        // Cosine gives 1 at front (0°), 0 at 90°, -1 at 180°
+        const fade = Math.cos(radians);
+        const opacity = Math.max(0, fade); // Fade out when turned away
 
         span.style.opacity = opacity;
+        span.style.transform = `rotateY(${baseAngle}deg) translateZ(${radius}px)`;
       });
 
       requestAnimationFrame(animate);
