@@ -23,12 +23,7 @@
       width: 300px;
       height: 300px;
       transform-style: preserve-3d;
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      0% { transform: perspective(1000px) rotateY(0deg); }
-      100% { transform: perspective(1000px) rotateY(360deg); }
+      perspective: 1000px;
     }
 
     .box span {
@@ -39,7 +34,7 @@
       height: 100%;
       transform-origin: center;
       transform-style: preserve-3d;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.2s linear;
     }
 
     .box span img {
@@ -53,15 +48,14 @@
 <body>
 
   <div class="box" id="rotatingBox">
-    <!-- 8 images at 45-degree intervals -->
-    <span style="--i: 0;"><img src="images/logo.png" /></span>
-    <span style="--i: 1;"><img src="images/logo.png" /></span>
-    <span style="--i: 2;"><img src="images/logo.png" /></span>
-    <span style="--i: 3;"><img src="images/logo.png" /></span>
-    <span style="--i: 4;"><img src="images/logo.png" /></span>
-    <span style="--i: 5;"><img src="images/logo.png" /></span>
-    <span style="--i: 6;"><img src="images/logo.png" /></span>
-    <span style="--i: 7;"><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
+    <span><img src="images/logo.png" /></span>
   </div>
 
   <script>
@@ -70,30 +64,37 @@
     const total = spans.length;
     const radius = 400;
 
+    let rotation = 0; // in degrees
+
+    // Position spans in a circle
     spans.forEach((span, i) => {
-      const angle = (360 / total) * i;
-      span.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+      span.dataset.index = i;
     });
 
-    // Optional enhancement: fade out images as they rotate away
-    function updateFade() {
-      const boxRotation = getComputedStyle(box).transform;
-      if (!boxRotation.startsWith("matrix3d")) return;
-
-      const values = boxRotation.split("(")[1].split(")")[0].split(",");
-      const rotationY = Math.asin(values[8]) * (180 / Math.PI); // Approximate Y rotation
+    function animate() {
+      rotation += 0.2; // Adjust speed
+      box.style.transform = `perspective(1000px) rotateY(${rotation}deg)`;
 
       spans.forEach((span, i) => {
-        const angle = ((360 / total) * i + rotationY + 360) % 360;
-        const visibility = Math.cos((angle * Math.PI) / 180); // Fade out near 90° and 270°
-        const opacity = Math.max(0, visibility); // Clamp between 0–1
+        const angle = (360 / total) * i;
+        const currentAngle = (angle + rotation) % 360;
+        const relativeAngle = (currentAngle + 360) % 360;
+
+        // Position each span
+        span.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+
+        // Fade based on angle — cosine curve (max at 0°, min at 90°/270°)
+        const radians = (relativeAngle * Math.PI) / 180;
+        const fadeFactor = Math.cos(radians);
+        const opacity = Math.max(0, fadeFactor); // clamp negative values
+
         span.style.opacity = opacity;
       });
 
-      requestAnimationFrame(updateFade);
+      requestAnimationFrame(animate);
     }
 
-    requestAnimationFrame(updateFade);
+    animate();
   </script>
 </body>
 </html>
