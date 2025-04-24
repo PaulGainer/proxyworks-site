@@ -64,11 +64,25 @@ const panels = [...ring.children];
 const total  = panels.length;
 const slice  = 360 / total;
 
+const CONE = 60;           // degrees from centre where logo is allowed to glow
+
 /* --- Static placement: one-off ---------------------------------- */
-panels.forEach((p, i) => {
-  const a = slice * i;                            // yaw ° around ring
-  p.style.transform = `rotateY(${a}deg) translateZ(${RADIUS}px)`;
+panels.forEach((p,i)=>{
+const rel = (slice*i + yaw) % 360;                 // 0° = facing viewer
+const abs = Math.abs(((rel + 180) % 360) - 180);   // 0‒180 symmetrical
+
+let op;
+if (abs > CONE) {                 // outside cone ➜ invisible
+  op = 0;
+} else {                          // inside cone ➜ fade by cosine curve
+  /* Map  0° … CONE°  →  0 … π/2  then raise to a power
+     (sharper power ⇒ quicker fall-off) */
+  const ratio = abs / CONE;               // 0 … 1
+  op = Math.pow(Math.cos(ratio * Math.PI/2), 1.5);
+}
+p.style.opacity = op;
 });
+  
 
 /* --- Animation loop --------------------------------------------- */
 let yaw = 0;
