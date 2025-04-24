@@ -6,21 +6,22 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     display:flex;justify-content:center;align-items:center;
-    min-height:100vh;background:#000;overflow:hidden
+    height:100vh;background:#000;overflow:hidden;
+    perspective:1000px;          /* camera lives here and never moves  */
   }
 
-  .box{
-    position:relative;width:300px;height:300px;
-    transform-style:preserve-3d;perspective:1000px;
+  /* ring wrapper is no longer rotated — it just provides size */
+  .ring{
+    position:relative;
+    width:300px;height:300px;
+    transform-style:preserve-3d;
   }
 
-  .box span{
+  .ring span{
     position:absolute;inset:0;
-    transform-origin:center;
-    /*  🔥  remove transition: opacity 0.2s linear;  */
   }
 
-  .box span img{
+  .ring span img{
     width:100%;height:100%;object-fit:contain;
     backface-visibility:hidden;
   }
@@ -28,48 +29,43 @@
 </head>
 <body>
 
-<div class="box" id="rotatingBox">
-  <!-- 8 identical logos for demo -->
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
-  <span><img src="images/logo.png"></span>
+<div class="ring" id="ring">
+  <!-- eight identical slides for demo -->
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
+  <span><img src="images/logo.png" alt="logo"></span>
 </div>
 
 <script>
-  const box   = document.getElementById('rotatingBox');
-  const spans = box.querySelectorAll('span');
-  const total = spans.length;
-  const R     = 400;           // radius in px
-  let   rot   = 0;             // parent rotation (deg)
+  const ring   = document.getElementById('ring');
+  const cards  = ring.querySelectorAll('span');
+  const total  = cards.length;
+  const step   = 360/total;
+  const R      = 400;           // carousel radius in px
+  let   rot    = 0;             // global spin (deg)
 
-  // put every logo on the ring once, facing the viewer
-  spans.forEach((s,i)=>{
-    const a = 360/total * i;   // base angle for this slot
-    s.style.transform = `rotateY(${a}deg) translateZ(${R}px)`;
-  });
+  function draw(){
+    rot = (rot + 0.3) % 360;    // speed: 0.3°/frame → ~20 s per revolution
 
-  (function spin(){
-    rot = (rot+0.2)%360;       // speed: 0.2° per frame ≈ 30 s per full turn
-    box.style.transform = `rotateY(${rot}deg)`;
+    cards.forEach((card,i)=>{
+      const angle = (step*i + rot) % 360;          // where this card sits now
+      // keep it on the ring *and* facing the viewer
+      card.style.transform =
+        `rotateY(${angle}deg) translateZ(${R}px) rotateY(${-angle}deg)`;
 
-    spans.forEach((s,i)=>{
-      // angle of this span *after* the parent rotation
-      const rel = (360/total*i + rot) % 360;
-      const rad = rel*Math.PI/180;
-
-      /* fade curve: cos³ keeps the front image bright a little longer
-         and falls off quickly after ~45°.  You can tweak the exponent. */
-      const op  = Math.max(0, Math.pow(Math.cos(rad),3));
-      s.style.opacity = op;
+      /* fade front-to-side using cosine²  (full bright at 0°, dark past 90°) */
+      const op = Math.pow(Math.cos(angle*Math.PI/180),2);
+      card.style.opacity = op > 0 ? op : 0;
     });
 
-    requestAnimationFrame(spin);
-  })();
+    requestAnimationFrame(draw);
+  }
+  draw();
 </script>
 </body>
 </html>
