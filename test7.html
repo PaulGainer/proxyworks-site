@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ProxyWorks 3-D Logo Ring – drag to spin & dynamic occlusion</title>
+  <style>
+    /* ───────── RESET ───────── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font: inherit;
+    }
+
+    /* ───── LAYOUT & COLOUR ───── */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #101f24;                 /* brand background */
+      overflow: hidden;
+      color: #fff;
+      padding-inline: clamp(24px, 8vw, 80px);
+      user-select: none;                   /* disable text selection while dragging */
+    }
+
+    /* ───────── CAMERA ───────── */
+    .scene {
+      perspective: 1200px;
+    }
+
+    /* ───────── RING ───────── */
+    .ring {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      transform-style: preserve-3d;
+      transform-origin: center;
+      cursor: grab;
+      touch-action: none;                  /* disable native scroll on touch */
+    }
+    .ring.dragging {
+      cursor: grabbing;
+    }
+
+    /* ───────── PANELS ───────── */
+    .panel {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      background: #101f24;                 /* back-plate to hide panels behind */
+    }
+    .panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      backface-visibility: hidden;
+      pointer-events: none;                /* suppress ghost-drag */
+      user-drag: none;                     /* Safari */
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="ring" id="ring">
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+      <div class="panel"><img src="images/logo.png" alt="Logo" draggable="false"></div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * Config constants
+     ********************************************************************/
+    const RADIUS         = 350;   // px from centre to logo plane
+    const FULL_SWIPE_DEG = 180;   // screen-width drag → 180°
+    const MIN_SCALE      = 0.3;   // smallest at side/back
+    const FADE_EXPONENT  = 2;     // cos^2 fade
+    const BASE_SIZE      = 320;   // panel footprint (px)
+
+    /* calculate MAX_SCALE so front logo = 75% viewport width */
+    function calcMaxScale() {
+      const vw = innerWidth || document.documentElement.clientWidth;
+      return 0.75 * vw / BASE_SIZE;
+    }
+
+    let MAX_SCALE = calcMaxScale();
+    window.addEventListener('resize', () => {
+      MAX_SCALE = calcMaxScale();
+      render();
+    });
+
+    /********************************************************************
+     * Setup
+     ********************************************************************/
+    const ring   = document.getElementById('ring');
+    const panels = [...ring.children];
+    const total  = panels.length;
+    const slice  = 360 / total;
+
+    // one-time placement: record base angle
+    panels.forEach((p, i) => {
+      p.dataset.base = slice * i;
+    });
+
+    let yaw       = 0;
+    let dragging  = false;
+    let startX    = 0;
+    let startYaw  = 0;
+    let viewportW = innerWidth || document.documentElement.clientWidth;
+
+    /* render: rotation, fade, scale, and occlusion ordering */
+    function render() {
+      ring.style.transform = `rotateY(${yaw}deg)`;
+
+      // update each panel
+      panels.forEach(p => {
+        const base = +p.dataset.base;
+        const rel  = (base + yaw) % 360;
+        const rad  = rel * Math.PI / 180;
+        const vis  = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+
+        p.style.transform = 
+          `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+        p.style.opacity = vis;
+      });
+
+      // occlusion: painter's algorithm → back-to-front
+      const ordered = panels
+        .map(p => ({
+          panel: p,
+          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+        }))
+        .sort((a, b) => a.depth - b.depth)
+        .map(o => o.panel);
+
+      ordered.forEach(p => ring.appendChild(p));
+    }
+
+    /* pointer event handlers for drag */
+    ring.addEventListener('pointerdown', e => {
+      dragging  = true;
+      startX    = e.clientX;
+      startYaw  = yaw;
+      viewportW = innerWidth || document.documentElement.clientWidth;
+      ring.classList.add('dragging');
+      ring.setPointerCapture(e.pointerId);
+    });
+
+    ring.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      yaw = (startYaw + (dx / viewportW) * FULL_SWIPE_DEG) % 360;
+      render();
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      ring.classList.remove('dragging');
+    }
+    ring.addEventListener('pointerup', endDrag);
+    ring.addEventListener('pointercancel', endDrag);
+
+    // initial draw
+    render();
+  </script>
+</body>
+</html>
