@@ -1,71 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
+<title>ProxyWorks 3-D Logo Ring</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    display:flex;justify-content:center;align-items:center;
-    height:100vh;background:#000;overflow:hidden;
-    perspective:1000px;          /* camera lives here and never moves  */
-  }
+/* ====== BASIC RESET ====== */
+*{margin:0;padding:0;box-sizing:border-box;font:inherit}
+body{
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;background:#000;overflow:hidden;color:#fff
+}
 
-  /* ring wrapper is no longer rotated — it just provides size */
-  .ring{
-    position:relative;
-    width:300px;height:300px;
-    transform-style:preserve-3d;
-  }
+/* ====== 3-D SCENE ====== */
+.scene{               /* owns the camera */
+  perspective: 1200px;
+}
 
-  .ring span{
-    position:absolute;inset:0;
-  }
+/* ====== ROTATING RING ====== */
+.ring{
+  position:relative;
+  width:320px;height:320px;   /* logo size + padding */
+  transform-style:preserve-3d;
+  transform-origin:center;
+}
 
-  .ring span img{
-    width:100%;height:100%;object-fit:contain;
-    backface-visibility:hidden;
-  }
+/* ====== INDIVIDUAL PANELS ====== */
+.panel{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  /* each panel gets its own rotateY() translateZ() in JS */
+}
+.panel img{
+  width:100%;height:100%;
+  object-fit:contain;
+  backface-visibility:hidden; /* never show the “back” face */
+}
 </style>
 </head>
 <body>
 
-<div class="ring" id="ring">
-  <!-- eight identical slides for demo -->
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
-  <span><img src="images/logo.png" alt="logo"></span>
+<div class="scene">
+  <div class="ring" id="ring">
+    <!-- 8 copies of the logo; swap src as needed -->
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+  </div>
 </div>
 
 <script>
-  const ring   = document.getElementById('ring');
-  const cards  = ring.querySelectorAll('span');
-  const total  = cards.length;
-  const step   = 360/total;
-  const R      = 400;           // carousel radius in px
-  let   rot    = 0;             // global spin (deg)
+/*** CONFIG **********************************************************/
+const SPEED  = 0.2;     // ° per frame  (≈30 s per full revolution)
+const RADIUS = 450;     // px distance from centre to logo plane
+/*********************************************************************/
 
-  function draw(){
-    rot = (rot + 0.3) % 360;    // speed: 0.3°/frame → ~20 s per revolution
+const ring   = document.getElementById('ring');
+const panels = [...ring.children];
+const total  = panels.length;
+const slice  = 360 / total;
 
-    cards.forEach((card,i)=>{
-      const angle = (step*i + rot) % 360;          // where this card sits now
-      // keep it on the ring *and* facing the viewer
-      card.style.transform =
-        `rotateY(${angle}deg) translateZ(${R}px) rotateY(${-angle}deg)`;
+/* --- Static placement: one-off ---------------------------------- */
+panels.forEach((p, i) => {
+  const a = slice * i;                            // yaw ° around ring
+  p.style.transform = `rotateY(${a}deg) translateZ(${RADIUS}px)`;
+});
 
-      /* fade front-to-side using cosine²  (full bright at 0°, dark past 90°) */
-      const op = Math.pow(Math.cos(angle*Math.PI/180),2);
-      card.style.opacity = op > 0 ? op : 0;
-    });
+/* --- Animation loop --------------------------------------------- */
+let yaw = 0;
+(function spin(){
+  yaw = (yaw + SPEED) % 360;                      // parent rotation
+  ring.style.transform = `rotateY(${yaw}deg)`;
 
-    requestAnimationFrame(draw);
-  }
-  draw();
+  /* Fade each panel based on viewer-facing angle */
+  panels.forEach((p,i)=>{
+    const rel = (slice*i + yaw) % 360;            // 0° = dead-centre
+    const op  = Math.max(0, Math.cos(rel * Math.PI/180));  // cosine fade
+    p.style.opacity = op;
+  });
+  requestAnimationFrame(spin);
+})();
 </script>
 </body>
 </html>
