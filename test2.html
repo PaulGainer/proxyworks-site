@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ProxyWorks 3-D Logo Ring</title>
+
+<style>
+/* ============ RESET ============ */
+*{margin:0;padding:0;box-sizing:border-box;font:inherit}
+
+/* ==== CENTRING + BORDER PADDING ==== */
+body{
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;
+  background:#101f24;overflow:hidden;color:#fff;
+
+  /* new – responsive left/right “gutter” */
+  padding-inline: clamp(24px, 8vw, 80px);
+}
+
+/* ===== 3-D SCENE / CAMERA ===== */
+.scene{perspective:1200px;}
+
+/* ===== ROTATING RING ===== */
+.ring{
+  position:relative;
+  width:320px;height:320px;          /* 2-D footprint */
+  transform-style:preserve-3d;
+  transform-origin:center;
+}
+
+/* ===== INDIVIDUAL PANELS ===== */
+.panel{position:absolute;inset:0;transform-style:preserve-3d;}
+
+.panel img{
+  width:100%;height:100%;
+  object-fit:contain;
+  backface-visibility:hidden;
+}
+</style>
+</head>
+
+<body>
+<div class="scene">
+  <div class="ring" id="ring">
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+    <div class="panel"><img src="images/logo.png" alt="Logo"></div>
+  </div>
+</div>
+
+<script>
+/********************************************************************
+ * Config — tweak as you like
+ ********************************************************************/
+const SPEED  = 0.2;      // ° per animation frame  (≈30 s per turn)
+const RADIUS = 380;      // px from centre to logo plane (trimmed)
+/********************************************************************/
+
+const ring   = document.getElementById('ring');
+const panels = [...ring.children];
+const total  = panels.length;
+const slice  = 360 / total;
+
+/* Static placement ------------------------------------------------ */
+panels.forEach((p, i) => {
+  const a = slice * i;
+  p.style.transform = `rotateY(${a}deg) translateZ(${RADIUS}px)`;
+});
+
+/* Animation loop -------------------------------------------------- */
+let yaw = 0;
+(function spin(){
+  yaw = (yaw + SPEED) % 360;
+  ring.style.transform = `rotateY(${yaw}deg)`;
+
+  panels.forEach((p, i) => {
+    const rel = (slice * i + yaw) % 360;         // facing angle
+    const rad = rel * Math.PI / 180;
+    const op  = Math.pow(Math.max(0, Math.cos(rad)), 2);  // cos² fade
+    p.style.opacity = op;
+  });
+
+  requestAnimationFrame(spin);
+})();
+</script>
+</body>
+</html>
