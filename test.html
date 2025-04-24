@@ -1,118 +1,75 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <style>
-            /* Applying Global CSS */
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    display:flex;justify-content:center;align-items:center;
+    min-height:100vh;background:#000;overflow:hidden
+  }
 
-            /* Centering the content of whole body */
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                background: #000;
-            }
+  .box{
+    position:relative;width:300px;height:300px;
+    transform-style:preserve-3d;perspective:1000px;
+  }
 
-            /* Adding transform-style CSS 
-               property to the boxes */
-            .box {
-                position: relative;
-                width: 200px;
-                height: 200px;
-                transform-style: preserve-3d;
-                animation: animate 20s linear infinite;
-            }
+  .box span{
+    position:absolute;inset:0;
+    transform-origin:center;
+    /*  🔥  remove transition: opacity 0.2s linear;  */
+  }
 
-            /* Adding keyframes for animation */
-            @keyframes animate {
-                0% {
-                  transform: perspective(1000px) rotateY(0deg);
-                }
-                100% {
-                 transform: perspective(1000px) rotateY(360deg);
-                }
-            }
+  .box span img{
+    width:100%;height:100%;object-fit:contain;
+    backface-visibility:hidden;
+  }
+</style>
+</head>
+<body>
 
-            /* Adding CSS to all the span 
-               tags for animation */
-            .box span {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                transform-origin: center;
-                transform-style: preserve-3d;
-                transform:
-             rotateY(calc(var(--i) * 45deg)) translateZ(400px);
-                -webkit-box-reflect: 
-     below 0px linear-gradient(transparent, transparent, #0004);
-            }
+<div class="box" id="rotatingBox">
+  <!-- 8 identical logos for demo -->
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+  <span><img src="images/logo.png"></span>
+</div>
 
-            /* Adding object-fit CSS 
-          property to all the images */
-            .box span img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 250px;
-                width: 300px;
-                object-fit: cover;
-            }
-        </style>
-    </head>
+<script>
+  const box   = document.getElementById('rotatingBox');
+  const spans = box.querySelectorAll('span');
+  const total = spans.length;
+  const R     = 400;           // radius in px
+  let   rot   = 0;             // parent rotation (deg)
 
-    <body>
-        <div class="box">
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 1;">
-                <img src="images/logo.png" />
-            </span>
+  // put every logo on the ring once, facing the viewer
+  spans.forEach((s,i)=>{
+    const a = 360/total * i;   // base angle for this slot
+    s.style.transform = `rotateY(${a}deg) translateZ(${R}px)`;
+  });
 
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 2;">
-                <img src="images/logo.png" />
-            </span>
+  (function spin(){
+    rot = (rot+0.2)%360;       // speed: 0.2° per frame ≈ 30 s per full turn
+    box.style.transform = `rotateY(${rot}deg)`;
 
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 4;">
-                <img src="images/logo.png" />
-            </span>
+    spans.forEach((s,i)=>{
+      // angle of this span *after* the parent rotation
+      const rel = (360/total*i + rot) % 360;
+      const rad = rel*Math.PI/180;
 
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 5;">
-                <img src="images/logo.png" />
-            </span>
+      /* fade curve: cos³ keeps the front image bright a little longer
+         and falls off quickly after ~45°.  You can tweak the exponent. */
+      const op  = Math.max(0, Math.pow(Math.cos(rad),3));
+      s.style.opacity = op;
+    });
 
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 6;">
-                <img src="images/logo.png" />
-            </span>
-
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 7;">
-                <img src="images/logo.png" />
-            </span>
-
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 8;">
-                <img src="images/logo.png" />
-            </span>
-
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 9;">
-                <img src="images/logo.png" />
-            </span>
-
-            <!-- Adding CSS variable --i -->
-            <span style="--i: 3;">
-                <img src="images/logo.png" />
-            </span>
-        </div>
-    </body>
+    requestAnimationFrame(spin);
+  })();
+</script>
+</body>
 </html>
