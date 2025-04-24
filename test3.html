@@ -11,7 +11,7 @@
 /* ==== CENTRING + BORDER PADDING ==== */
 body{
   display:flex;justify-content:center;align-items:center;
-  min-height:100vh;background:#000;overflow:hidden;color:#fff;
+  min-height:100vh;background:#101f24;overflow:hidden;color:#fff;
 
   /* keep ring away from screen edges */
   padding-inline: clamp(24px, 8vw, 80px);
@@ -30,6 +30,7 @@ body{
   transform-style:preserve-3d;
   transform-origin:center;
   cursor:grab;                     /* visual cue */
+  touch-action:none;               /* ← block native pan / drag on touch screens */
 }
 .ring.dragging{cursor:grabbing;}   /* while pointer down */
 
