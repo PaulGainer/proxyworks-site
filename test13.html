@@ -26,14 +26,14 @@
       position:sticky; top:0; z-index:100;
       background:var(--brand-bg);
       overflow:hidden;
-      /* responsive between 320px and 400px tall */
       height:clamp(320px,30vh,400px);
       display:flex; justify-content:center; align-items:center;
     }
     .scene { perspective:1200px }
     .ring {
-      /* match hero height exactly, width = same (square) */
+      /* ← explicit width-from-height via aspect-ratio ↓ */
       height:100%;
+      width:auto;
       aspect-ratio:1/1;
       margin:0 auto;
 
@@ -85,10 +85,10 @@
   <section class="hero">
     <div class="scene">
       <div class="ring" id="ring">
-        <div class="panel"><img src="images/logo.png" alt="Logo 1" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 2" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 3" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 4" draggable="false"></div>
+        <div class="panel"><img src="images/logo1.png" alt="Logo 1" draggable="false"></div>
+        <div class="panel"><img src="images/logo2.png" alt="Logo 2" draggable="false"></div>
+        <div class="panel"><img src="images/logo3.png" alt="Logo 3" draggable="false"></div>
+        <div class="panel"><img src="images/logo4.png" alt="Logo 4" draggable="false"></div>
       </div>
     </div>
   </section>
@@ -98,7 +98,7 @@
     <p>An AI-powered GM system for narrative-driven tabletop roleplaying games.<br>
        We're building something epic — one system, one story, one world at a time.</p>
     <p class="email">📬 contact@proxyworks.net</p>
-    <div style="height:200px;"></div>
+    <div style="height:200px"></div>
   </section>
 
   <footer>
@@ -106,9 +106,6 @@
   </footer>
 
   <script>
-    /********************************************************************
-     * Constants & state
-     ********************************************************************/
     const SCROLL_THRESHOLD = 1000;
     const PANEL_COUNT      = 4;
     const MIN_SCALE        = 0.3;
@@ -118,57 +115,41 @@
     const ring   = document.getElementById('ring');
     const panels = [...ring.children];
     const slice  = 360 / PANEL_COUNT;
-    let yaw          = 0;
-    let currentIndex = -1;
+    panels.forEach((p,i)=>p.dataset.base = slice*i);
 
-    // record each panel's base angle
-    panels.forEach((p,i)=> p.dataset.base = slice * i);
+    document.querySelector('.content')
+      .style.minHeight = (SCROLL_THRESHOLD * PANEL_COUNT) + 'px';
 
-    // ensure content is scrollable
-    const content = document.querySelector('.content');
-    content.style.minHeight = (SCROLL_THRESHOLD * PANEL_COUNT) + 'px';
-
-    // compute radius dynamically from ring's live height
-    function getRadius() {
-      return ring.clientHeight * 1.1;  // extra to push panels out
-    }
-
-    // render loop: rotate, scale, fade, and painter-order
+    let currentIndex = -1, yaw = 0;
     function render() {
-      const R = getRadius();
+      const R = ring.clientHeight * 1.1;
       ring.style.transform = `rotateY(${yaw}deg)`;
-
       panels.forEach(p=>{
         const base = +p.dataset.base;
-        const rel  = (base + yaw) % 360;
-        const rad  = rel * Math.PI/180;
+        const rel  = (base + yaw)%360;
+        const rad  = rel*Math.PI/180;
         const vis  = Math.pow(Math.max(0,Math.cos(rad)), FADE_EXPONENT);
-        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE)*vis;
         p.style.opacity   = vis;
         p.style.transform =
           `rotateY(${base}deg) translateZ(${R}px) scale(${scl})`;
       });
-
-      // painter’s algorithm: back-to-front
       panels
-        .map(p => ({ panel:p, depth: Math.cos((+p.dataset.base + yaw)*Math.PI/180) }))
-        .sort((a,b)=> a.depth - b.depth)
-        .forEach(o=> ring.appendChild(o.panel));
+        .map(p=>({panel:p,depth:Math.cos((+p.dataset.base+yaw)*Math.PI/180)}))
+        .sort((a,b)=>a.depth-b.depth)
+        .forEach(o=>ring.appendChild(o.panel));
     }
-
-    // on scroll, snap to the next slide
-    function onScroll() {
-      let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
-      idx = Math.min(Math.max(idx,0), PANEL_COUNT -1);
-      if (idx !== currentIndex) {
-        currentIndex = idx;
-        yaw = -slice * idx;
+    function onScroll(){
+      let idx = Math.floor(window.scrollY/SCROLL_THRESHOLD);
+      idx = Math.min(Math.max(idx,0),PANEL_COUNT-1);
+      if(idx!==currentIndex){
+        currentIndex=idx;
+        yaw=-slice*idx;
         render();
       }
     }
-
-    window.addEventListener('scroll', onScroll, { passive:true });
-    window.addEventListener('resize', render);
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',render);
     onScroll();
   </script>
 </body>
