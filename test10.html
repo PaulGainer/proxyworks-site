@@ -38,36 +38,31 @@
       z-index: 100;
       background: var(--brand-bg);
       overflow: hidden;
-      height: 320px;               /* full original height */
+      height: 320px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .scene {
-      perspective: 1200px;
-    }
+    .scene { perspective: 1200px; }
     .ring {
       position: relative;
       width: 320px;
       height: 320px;
       transform-style: preserve-3d;
       transform-origin: center;
-      transition: transform 0.4s ease;  /* snap animation */
+      transition: transform 0.4s ease;
     }
     .panel {
       position: absolute;
       inset: 0;
       transform-style: preserve-3d;
       background: var(--brand-bg);
-      transition: transform 0.4s ease,
-                  opacity 0.4s ease;
+      transition: transform 0.4s ease, opacity 0.4s ease;
     }
     .panel img {
-      /* ↓ UPDATED: ensure full image fits without clipping ↓ */
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      object-position: center center;
+      /* ↓ NEW: fit height exactly, auto-scale width, centered ↓ */
+      height: 100%;
+      width: auto;
       display: block;
       margin: auto;
 
@@ -81,7 +76,6 @@
       background: #ffffff;
       color: var(--brand-bg);
       padding: 40px 20px;
-      /* min-height set via JS */
     }
     .content h2 {
       font-size: 2.5rem;
@@ -96,14 +90,13 @@
       opacity: 0.85;
       text-align: center;
     }
-
     .email {
       display: block;
       margin-top: 30px !important;
       font-weight: bold;
       color: var(--brand-bg);
     }
-    
+
     /* ───────── FOOTER ───────── */
     footer {
       text-align: center;
@@ -149,11 +142,11 @@
      * Configuration constants
      ********************************************************************/
     const SCROLL_THRESHOLD = 1000;   // px of scroll → advance one slide
-    const PANEL_COUNT      = 4;      // number of panels
-    const RADIUS           = 350;    // px from centre to panel
-    const MIN_SCALE        = 0.3;    // scale at side/back
-    const MAX_SCALE        = 1;      // fixed maximum scale
-    const FADE_EXPONENT    = 2;      // cos^exp fade curve
+    const PANEL_COUNT      = 4;
+    const RADIUS           = 350;
+    const MIN_SCALE        = 0.3;
+    const MAX_SCALE        = 1;
+    const FADE_EXPONENT    = 2;
 
     /********************************************************************
      * Carousel setup
@@ -162,65 +155,43 @@
     const panels = [...ring.children];
     const slice  = 360 / PANEL_COUNT;
 
-    // Record each panel's base rotation angle
-    panels.forEach((p, i) => {
-      p.dataset.base = slice * i;
-    });
+    panels.forEach((p, i) => { p.dataset.base = slice * i; });
 
-    // Ensure content is tall enough for scrolling through all panels
     const content = document.querySelector('.content');
     content.style.minHeight = (SCROLL_THRESHOLD * PANEL_COUNT) + 'px';
 
-    let currentIndex = -1;
-    let yaw          = 0;
+    let currentIndex = -1, yaw = 0;
 
-    /**
-     * Render the ring: rotate, fade, scale, and re-order panels
-     */
     function render() {
-      // Rotate ring so the desired panel is at front
       ring.style.transform = `rotateY(${yaw}deg)`;
-
-      // Update opacity & scale for each panel
       panels.forEach(p => {
         const base = +p.dataset.base;
         const rel  = (base + yaw) % 360;
-        const rad  = rel * Math.PI / 180;
+        const rad  = rel * Math.PI/180;
         const vis  = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
-        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE)*vis;
 
         p.style.opacity   = vis;
         p.style.transform =
           `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
       });
-
-      // Painter's algorithm: back-to-front DOM order
-      const ordered = panels
-        .map(p => ({
-          panel: p,
-          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
-        }))
-        .sort((a, b) => a.depth - b.depth)
-        .map(o => o.panel);
-
-      ordered.forEach(p => ring.appendChild(p));
+      panels
+        .map(p=>({panel:p,depth:Math.cos((+p.dataset.base+yaw)*Math.PI/180)}))
+        .sort((a,b)=>a.depth-b.depth)
+        .forEach(o=> ring.appendChild(o.panel));
     }
 
-    /**
-     * On scroll: compute which panel index to show, then snap to it
-     */
     function onScroll() {
       let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
-      idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
-      if (idx !== currentIndex) {
+      idx = Math.max(0, Math.min(PANEL_COUNT-1, idx));
+      if (idx!==currentIndex) {
         currentIndex = idx;
-        yaw = -slice * currentIndex;
+        yaw = -slice * idx;
         render();
       }
     }
 
-    // Attach scroll listener & initialize
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, {passive:true});
     onScroll();
   </script>
 </body>
