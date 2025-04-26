@@ -345,7 +345,7 @@
   }
   
   /********************************************************************
-   * Shimmering Grid Background with Radial Fade
+   * Shimmering Grid Background with Scroll Drift
    ********************************************************************/
   const canvas = document.getElementById('grid-canvas');
   const ctx = canvas.getContext('2d');
@@ -365,6 +365,8 @@
     const moveSpeed = 0.05;
     offset += moveSpeed;
   
+    const verticalDrift = window.scrollY * 0.1; // 🎯 Drift factor
+  
     for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
@@ -372,7 +374,7 @@
       ctx.stroke();
     }
   
-    for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
+    for (let y = -spacing + ((offset + verticalDrift) % spacing); y < canvas.height; y += spacing) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
@@ -402,13 +404,13 @@
   animate();
   
   /********************************************************************
-   * New: Panel Cascade Fade + Scale on Load
+   * Panel Cascade Fade+Scale on Load
    ********************************************************************/
   window.addEventListener('load', () => {
     panels.forEach((panel, index) => {
       setTimeout(() => {
         panel.classList.add('visible');
-      }, index * 150); // 150ms delay between each panel appearing
+      }, index * 150); // 150ms between each
     });
   });
 </script>
