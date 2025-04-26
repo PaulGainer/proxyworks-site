@@ -33,10 +33,15 @@
 
     /* ───────── HERO (carousel) ───────── */
     .hero {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       background: var(--brand-bg);
-      overflow: hidden;                          /* hide overflow of taller ring */
-      height: calc(320px * 2 / 3);               /* 2/3 of original 320px */
-      display: flex; justify-content: center; align-items: center;
+      overflow: hidden;                          
+      height: 320px;                              /* restored to original size */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .scene {
       perspective: 1200px;
@@ -47,15 +52,15 @@
       height: 320px;
       transform-style: preserve-3d;
       transform-origin: center;
-      transition: transform 0.4s ease;           /* snap animation */
+      transition: transform 0.4s ease;           
     }
     .panel {
       position: absolute;
       inset: 0;
       transform-style: preserve-3d;
-      background: var(--brand-bg);               /* back-plate hides behind panels */
+      background: var(--brand-bg);               
       transition: transform 0.4s ease,
-                  opacity 0.4s ease;            /* smooth fade & scale */
+                  opacity 0.4s ease;            
     }
     .panel img {
       width: 100%;
@@ -71,7 +76,7 @@
       background: #ffffff;
       color: var(--brand-bg);
       padding: 40px 20px;
-      /* min-height will be set via JS for scroll testing */
+      /* min-height set via JS */
     }
     .content h2 {
       font-size: 2.5rem;
@@ -99,20 +104,19 @@
 </head>
 
 <body>
-  <!-- HERO: scroll-triggered carousel -->
+  <!-- HERO: fixed-at-top carousel -->
   <section class="hero">
     <div class="scene">
       <div class="ring" id="ring">
-        <!-- Only 4 panels as requested -->
-        <div class="panel"><img src="images/logo.png" alt="Logo 1" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 2" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 3" draggable="false"></div>
-        <div class="panel"><img src="images/logo.png" alt="Logo 4" draggable="false"></div>
+        <div class="panel"><img src="images/logo1.png" alt="Logo 1" draggable="false"></div>
+        <div class="panel"><img src="images/logo2.png" alt="Logo 2" draggable="false"></div>
+        <div class="panel"><img src="images/logo3.png" alt="Logo 3" draggable="false"></div>
+        <div class="panel"><img src="images/logo4.png" alt="Logo 4" draggable="false"></div>
       </div>
     </div>
   </section>
 
-  <!-- CONTENT: tall enough to scroll through all 4 slides -->
+  <!-- CONTENT: tall enough to scroll through all slides -->
   <section class="content">
     <h2>Engineering Intelligent Worlds</h2>
     <p>
@@ -120,7 +124,6 @@
       We're building something epic — one system, one story, one world at a time.
     </p>
     <p class="email">📬 contact@proxyworks.net</p>
-    <!-- extra space so footer isn't at very bottom -->
     <div style="height:200px;"></div>
   </section>
 
@@ -140,18 +143,12 @@
     const FADE_EXPONENT    = 2;      // cos^exp fade curve
     const BASE_SIZE        = 320;    // panel footprint (px)
 
-    /**
-     * Calculate the dynamic max scale so the centered logo
-     * occupies ~75% of viewport width.
-     */
     function calcMaxScale() {
       const vw = window.innerWidth || document.documentElement.clientWidth;
       return 0.75 * vw / BASE_SIZE;
     }
 
     let MAX_SCALE = calcMaxScale();
-
-    // Recompute max scale on resize
     window.addEventListener('resize', () => {
       MAX_SCALE = calcMaxScale();
       render();
@@ -164,26 +161,18 @@
     const panels = [...ring.children];
     const slice  = 360 / PANEL_COUNT;
 
-    // One-time record of each panel's base angle
     panels.forEach((p, i) => {
       p.dataset.base = slice * i;
     });
 
-    // Ensure content is tall enough for scrolling through all panels
     const content = document.querySelector('.content');
     content.style.minHeight = (SCROLL_THRESHOLD * PANEL_COUNT) + 'px';
 
-    let currentIndex = -1;  // which panel is front
-    let yaw          = 0;   // current rotation in degrees
+    let currentIndex = -1;
+    let yaw          = 0;
 
-    /**
-     * Render the ring: rotate, fade, scale, and re-order panels
-     */
     function render() {
-      // 1) rotate ring to bring currentIndex front
       ring.style.transform = `rotateY(${yaw}deg)`;
-
-      // 2) update each panel's fade & scale
       panels.forEach(p => {
         const base = +p.dataset.base;
         const rel  = (base + yaw) % 360;
@@ -196,7 +185,7 @@
           `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
       });
 
-      // 3) occlusion via painter's algorithm: back-to-front DOM order
+      // Painter's algorithm: back-to-front reordering
       const ordered = panels
         .map(p => ({
           panel: p,
@@ -208,22 +197,17 @@
       ordered.forEach(p => ring.appendChild(p));
     }
 
-    /**
-     * On scroll: determine which panel to show and snap to it
-     */
     function onScroll() {
       let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
       if (idx < 0) idx = 0;
       if (idx > PANEL_COUNT - 1) idx = PANEL_COUNT - 1;
       if (idx !== currentIndex) {
         currentIndex = idx;
-        // Negative yaw brings panel 'idx' to front
         yaw = -slice * currentIndex;
         render();
       }
     }
 
-    // Attach scroll listener, initially render slide 0
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   </script>
