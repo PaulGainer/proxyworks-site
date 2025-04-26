@@ -29,6 +29,7 @@
                    "Open Sans", "Helvetica Neue", sans-serif;
     }
 
+    /* ───── HERO ───── */
     .hero {
       position: fixed;
       top: 0;
@@ -64,6 +65,12 @@
     .scene {
       perspective: 1200px;
       z-index: 2;
+      opacity: 0; /* Start transparent */
+      transition: opacity 1s ease; /* Fade in animation */
+    }
+
+    .scene.visible {
+      opacity: 1; /* Fade to full opacity */
     }
 
     .ring {
@@ -125,6 +132,7 @@
       animation: breathe 8s ease-in-out infinite;
     }
 
+    /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
       color: var(--brand-bg);
@@ -179,6 +187,7 @@
       opacity: 0.85;
     }
 
+    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -201,7 +210,7 @@
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
-    <div class="scene">
+    <div class="scene" id="scene">
       <div class="ring" id="ring">
         <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
         <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" draggable="false" /></div></div>
@@ -304,7 +313,7 @@
     onScroll();
 
     /********************************************************************
-     * Footer + Section Fade
+     * Footer and Section Fade
      ********************************************************************/
     const footer = document.querySelector('footer');
 
@@ -342,7 +351,7 @@
     }
 
     /********************************************************************
-     * Shimmering Grid with Correct Radial Mask
+     * Grid Canvas with Radial Fade
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
@@ -377,7 +386,6 @@
         ctx.stroke();
       }
 
-      // ✅ Correct radial fade: center transparent, edges visible
       const gradient = ctx.createRadialGradient(
         canvas.width / 2, canvas.height / 2, 0,
         canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
@@ -399,6 +407,14 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     animate();
+
+    /********************************************************************
+     * Fade in Carousel Scene
+     ********************************************************************/
+    window.addEventListener('load', () => {
+      const scene = document.getElementById('scene');
+      scene.classList.add('visible');
+    });
   </script>
 </body>
 </html>
