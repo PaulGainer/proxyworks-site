@@ -38,9 +38,9 @@
       z-index: 100;
       background: var(--brand-bg);
 
-      /* clip panels at bottom & be responsive */
       overflow: hidden;
-      height: clamp(280px, 30vh, 400px);
+      /* never go below 320px (the ring’s height), cap at 400px, prefer 30vh */
+      height: clamp(320px, 30vh, 400px);
 
       display: flex;
       justify-content: center;
