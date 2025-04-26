@@ -29,6 +29,7 @@
                    "Open Sans", "Helvetica Neue", sans-serif;
     }
 
+    /* ───── HERO ───── */
     .hero {
       position: fixed;
       top: 0;
@@ -90,7 +91,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: transform 0.4s ease, opacity 0.4s ease;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .panel.visible {
+      opacity: 1;
     }
 
     .image-container {
@@ -125,6 +131,7 @@
       animation: breathe 8s ease-in-out infinite;
     }
 
+    /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
       color: var(--brand-bg);
@@ -179,6 +186,7 @@
       opacity: 0.85;
     }
 
+    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -201,7 +209,7 @@
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
-    <div class="scene">
+    <div class="scene" id="scene">
       <div class="ring" id="ring">
         <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
         <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" draggable="false" /></div></div>
@@ -239,166 +247,169 @@
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
 
-  <script>
-    /********************************************************************
-     * Carousel Setup
-     ********************************************************************/
-    const SCROLL_THRESHOLD = 600;
-    const PANEL_COUNT = 4;
-    const RADIUS = 350;
-    const MIN_SCALE = 0.3;
-    const MAX_SCALE = 0.85;
-    const FADE_EXPONENT = 2;
+<script>
+/********************************************************************
+ * Carousel + Cascade Fade Setup
+ ********************************************************************/
+const SCROLL_THRESHOLD = 600;
+const PANEL_COUNT = 4;
+const RADIUS = 350;
+const MIN_SCALE = 0.3;
+const MAX_SCALE = 0.85;
+const FADE_EXPONENT = 2;
 
-    const ring = document.getElementById('ring');
-    const panels = [...ring.children];
-    const slice = 360 / PANEL_COUNT;
+const ring = document.getElementById('ring');
+const panels = [...ring.children];
+const slice = 360 / PANEL_COUNT;
 
-    panels.forEach((p, i) => {
-      p.dataset.base = slice * i;
+panels.forEach((p, i) => {
+  p.dataset.base = slice * i;
+});
+
+let currentIndex = -1;
+let yaw = 0;
+
+function render() {
+  ring.style.transform = `rotateY(${yaw}deg)`;
+
+  panels.forEach(p => {
+    const base = +p.dataset.base;
+    const rel = (base + yaw) % 360;
+    const rad = rel * Math.PI / 180;
+    const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+    const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+
+    p.style.opacity = vis;
+    p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+
+    if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
+      p.classList.add('breathing');
+    } else {
+      p.classList.remove('breathing');
+    }
+  });
+
+  panels
+    .map(p => ({
+      panel: p,
+      depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+    }))
+    .sort((a, b) => a.depth - b.depth)
+    .forEach(o => ring.appendChild(o.panel));
+}
+
+function onScroll() {
+  let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
+  idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
+  if (idx !== currentIndex) {
+    currentIndex = idx;
+    yaw = -slice * idx;
+    render();
+  }
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/********************************************************************
+ * Footer and Section Fade
+ ********************************************************************/
+const footer = document.querySelector('footer');
+const sections = document.querySelectorAll('.scroll-section');
+
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
     });
+  }, { threshold: 0.5 });
 
-    let currentIndex = -1;
-    let yaw = 0;
+  sections.forEach(section => observer.observe(section));
 
-    function render() {
-      ring.style.transform = `rotateY(${yaw}deg)`;
-
-      panels.forEach(p => {
-        const base = +p.dataset.base;
-        const rel = (base + yaw) % 360;
-        const rad = rel * Math.PI / 180;
-        const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
-        const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
-
-        p.style.opacity = vis;
-        p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
-
-        if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
-          p.classList.add('breathing');
-        } else {
-          p.classList.remove('breathing');
-        }
-      });
-
-      panels
-        .map(p => ({
-          panel: p,
-          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
-        }))
-        .sort((a, b) => a.depth - b.depth)
-        .forEach(o => ring.appendChild(o.panel));
-    }
-
-    function onScroll() {
-      let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
-      idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
-      if (idx !== currentIndex) {
-        currentIndex = idx;
-        yaw = -slice * idx;
-        render();
+  const footerObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        footer.classList.add('visible');
       }
-    }
+    });
+  }, { threshold: 0.1 });
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+  footerObserver.observe(footer);
+} else {
+  sections.forEach(section => section.classList.add('visible'));
+  footer.classList.add('visible');
+}
 
-    /********************************************************************
-     * Footer + Section Fade
-     ********************************************************************/
-    const footer = document.querySelector('footer');
+/********************************************************************
+ * Grid Background
+ ********************************************************************/
+const canvas = document.getElementById('grid-canvas');
+const ctx = canvas.getContext('2d');
+let offset = 0;
 
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            footer.classList.add('visible');
-            observer.disconnect();
-          }
-        });
-      }, { threshold: 0.1 });
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
 
-      observer.observe(footer);
-    } else {
-      footer.classList.add('visible');
-    }
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+  ctx.lineWidth = 1;
 
-    const sections = document.querySelectorAll('.scroll-section');
+  const spacing = 40;
+  const moveSpeed = 0.05;
+  offset += moveSpeed;
 
-    if ('IntersectionObserver' in window) {
-      const sectionObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.5 });
+  for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
 
-      sections.forEach(section => {
-        sectionObserver.observe(section);
-      });
-    } else {
-      sections.forEach(section => section.classList.add('visible'));
-    }
+  for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
 
-    /********************************************************************
-     * Shimmering Grid with Correct Radial Mask
-     ********************************************************************/
-    const canvas = document.getElementById('grid-canvas');
-    const ctx = canvas.getContext('2d');
-    let offset = 0;
+  const gradient = ctx.createRadialGradient(
+    canvas.width / 2, canvas.height / 2, 0,
+    canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
+  );
+  gradient.addColorStop(0, "rgba(16,31,36,0)");
+  gradient.addColorStop(1, "rgba(16,31,36,1)");
 
-    function resizeCanvas() {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-    }
+  ctx.fillStyle = gradient;
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'source-over';
+}
 
-    function drawGrid() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
+function animate() {
+  drawGrid();
+  requestAnimationFrame(animate);
+}
 
-      const spacing = 40;
-      const moveSpeed = 0.05;
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+animate();
 
-      offset += moveSpeed;
+/********************************************************************
+ * Cascade Panel Fade-In
+ ********************************************************************/
+window.addEventListener('load', () => {
+  panels.forEach((panel, index) => {
+    setTimeout(() => {
+      panel.classList.add('visible');
+    }, index * 150); // 150ms delay between panels
+  });
+});
+</script>
 
-      for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // ✅ Correct radial fade: center transparent, edges visible
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 0,
-        canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
-      );
-      gradient.addColorStop(0, "rgba(16,31,36,0)");
-      gradient.addColorStop(1, "rgba(16,31,36,1)");
-
-      ctx.fillStyle = gradient;
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-
-    function animate() {
-      drawGrid();
-      requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-    animate();
-  </script>
 </body>
 </html>
