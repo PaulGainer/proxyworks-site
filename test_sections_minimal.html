@@ -132,6 +132,18 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    @media (max-width: 768px) {
+    .hero {
+      height: 240px; /* smaller hero on small screens */
+    }
+  
+    .hero-section {
+      height: calc(100vh - 240px); /* adjust first scroll block height accordingly */
+      min-height: 480px; /* fallback for very short screens */
+    }
+  }
+
   </style>
 </head>
 
