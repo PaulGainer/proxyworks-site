@@ -29,9 +29,8 @@
                    "Open Sans", "Helvetica Neue", sans-serif;
     }
 
-    /* ───── HERO ───── */
     .hero {
-      position: fixed; /* ✅ NOW FIXED */
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -50,7 +49,6 @@
       }
     }
 
-    /* Background grid canvas */
     #grid-canvas {
       position: absolute;
       top: 0;
@@ -114,11 +112,24 @@
       user-drag: none;
     }
 
-    /* ───── CONTENT ───── */
+    /* ✨ Breathing animation */
+    @keyframes breathe {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.03);
+      }
+    }
+
+    .breathing img {
+      animation: breathe 8s ease-in-out infinite;
+    }
+
     .content {
       background: #ffffff;
       color: var(--brand-bg);
-      padding-top: var(--hero-height-desktop); /* ✅ OFFSET the fixed hero */
+      padding-top: var(--hero-height-desktop);
     }
 
     @media (max-width: 768px) {
@@ -135,7 +146,6 @@
       align-items: center;
       padding: 20px;
       text-align: center;
-
       opacity: 0;
       transform: translateY(40px);
       transition: opacity 0.8s ease-out, transform 0.8s ease-out;
@@ -170,7 +180,6 @@
       opacity: 0.85;
     }
 
-    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -190,7 +199,6 @@
 </head>
 
 <body>
-  <!-- HERO SECTION -->
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
@@ -204,7 +212,6 @@
     </div>
   </section>
 
-  <!-- CONTENT SECTION -->
   <section class="content">
     <div class="scroll-section hero-section">
       <h2>Engineering Intelligent Worlds</h2>
@@ -229,12 +236,10 @@
     <div style="height: 300px;"></div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
 
-  <!-- SCRIPTS -->
   <script>
     /********************************************************************
      * Carousel Setup
@@ -269,6 +274,13 @@
 
         p.style.opacity = vis;
         p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+
+        // Breathing logic
+        if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
+          p.classList.add('breathing');
+        } else {
+          p.classList.remove('breathing');
+        }
       });
 
       panels
@@ -294,7 +306,7 @@
     onScroll();
 
     /********************************************************************
-     * Footer Fade-In
+     * Footer and Section Fade
      ********************************************************************/
     const footer = document.querySelector('footer');
 
@@ -313,9 +325,6 @@
       footer.classList.add('visible');
     }
 
-    /********************************************************************
-     * Section Fade-In
-     ********************************************************************/
     const sections = document.querySelectorAll('.scroll-section');
 
     if ('IntersectionObserver' in window) {
