@@ -11,6 +11,8 @@
     :root {
       --brand-bg: #101f24;
       --text-muted: #888888;
+      --hero-height-desktop: 320px;
+      --hero-height-mobile: 240px;
     }
 
     * {
@@ -29,12 +31,14 @@
 
     /* ───── HERO ───── */
     .hero {
-      position: sticky;
+      position: fixed; /* ✅ NOW FIXED */
       top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--hero-height-desktop);
       z-index: 100;
       background: var(--brand-bg);
       overflow: hidden;
-      height: 320px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -42,22 +46,26 @@
 
     @media (max-width: 768px) {
       .hero {
-        height: 240px;
+        height: var(--hero-height-mobile);
       }
+    }
 
-      .hero-section {
-        height: calc(100vh - 240px);
-        min-height: 480px;
-      }
-
-      .ring {
-        width: 240px;
-        height: 240px;
-      }
+    /* Background grid canvas */
+    #grid-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      will-change: transform, opacity;
+      transform: translateZ(0);
     }
 
     .scene {
       perspective: 1200px;
+      z-index: 2;
     }
 
     .ring {
@@ -67,6 +75,13 @@
       transform-style: preserve-3d;
       transform-origin: center;
       transition: transform 0.4s ease;
+    }
+
+    @media (max-width: 768px) {
+      .ring {
+        width: 240px;
+        height: 240px;
+      }
     }
 
     .panel {
@@ -103,6 +118,13 @@
     .content {
       background: #ffffff;
       color: var(--brand-bg);
+      padding-top: var(--hero-height-desktop); /* ✅ OFFSET the fixed hero */
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding-top: var(--hero-height-mobile);
+      }
     }
 
     .scroll-section {
@@ -114,9 +136,9 @@
       padding: 20px;
       text-align: center;
 
-      opacity: 0; /* 🔵 Start hidden */
-      transform: translateY(40px); /* 🔵 Bigger lift */
-      transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* 🔵 Slower and smoother */
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
 
     .scroll-section.visible {
@@ -125,8 +147,15 @@
     }
 
     .hero-section {
-      height: calc(100vh - 320px);
+      height: calc(100vh - var(--hero-height-desktop));
       min-height: 680px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section {
+        height: calc(100vh - var(--hero-height-mobile));
+        min-height: 480px;
+      }
     }
 
     .scroll-section h2 {
@@ -163,6 +192,8 @@
 <body>
   <!-- HERO SECTION -->
   <section class="hero">
+    <canvas id="grid-canvas"></canvas>
+
     <div class="scene">
       <div class="ring" id="ring">
         <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
@@ -263,7 +294,7 @@
     onScroll();
 
     /********************************************************************
-     * Footer Fade-In Observer
+     * Footer Fade-In
      ********************************************************************/
     const footer = document.querySelector('footer');
 
@@ -275,9 +306,7 @@
             observer.disconnect();
           }
         });
-      }, {
-        threshold: 0.1
-      });
+      }, { threshold: 0.1 });
 
       observer.observe(footer);
     } else {
@@ -285,7 +314,7 @@
     }
 
     /********************************************************************
-     * Section Fade-In Observer (STRONGER SETTINGS)
+     * Section Fade-In
      ********************************************************************/
     const sections = document.querySelectorAll('.scroll-section');
 
@@ -296,9 +325,7 @@
             entry.target.classList.add('visible');
           }
         });
-      }, {
-        threshold: 0.5 // 🔵 50% visible before triggering fade-in
-      });
+      }, { threshold: 0.5 });
 
       sections.forEach(section => {
         sectionObserver.observe(section);
@@ -306,6 +333,53 @@
     } else {
       sections.forEach(section => section.classList.add('visible'));
     }
+
+    /********************************************************************
+     * Shimmering Grid Background
+     ********************************************************************/
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let offset = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+
+      const spacing = 40;
+      const moveSpeed = 0.05;
+
+      offset += moveSpeed;
+
+      for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function animate() {
+      drawGrid();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animate();
   </script>
 </body>
 </html>
