@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ProxyWorks – AI-powered storytelling systems for tabletop roleplaying games." />
+  <meta name="author" content="ProxyWorks Ltd" />
+  <title>ProxyWorks</title>
+
+  <style>
+    :root {
+      --brand-bg: #101f24;
+      --text-muted: #888888;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      color: var(--brand-bg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                   "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
+    /* ───── HERO ───── */
+    .hero {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--brand-bg);
+      overflow: hidden;
+      height: 320px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scene {
+      perspective: 1200px;
+    }
+
+    .ring {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      transform-style: preserve-3d;
+      transform-origin: center;
+      transition: transform 0.4s ease;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      background: var(--brand-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    .image-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .image-container img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      backface-visibility: hidden;
+      pointer-events: none;
+      user-drag: none;
+    }
+
+    /* ───── CONTENT ───── */
+    .content {
+      background: #ffffff;
+      color: var(--brand-bg);
+    }
+
+    .scroll-section {
+      height: 1000px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .hero-section {
+      height: calc(100vh - 320px); /* ✅ fixes alignment under sticky hero */
+      min-height: 680px;
+    }
+
+    .scroll-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .scroll-section p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      opacity: 0.85;
+    }
+
+    /* ───── FOOTER ───── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    footer.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="scene">
+      <div class="ring" id="ring">
+        <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
+        <div class="panel"><div class="image-container"><img src="images/vision.png" alt="Vision" draggable="false" /></div></div>
+        <div class="panel"><div class="image-container"><img src="images/how.png" alt="How" draggable="false" /></div></div>
+        <div class="panel"><div class="image-container"><img src="images/join.png" alt="Join" draggable="false" /></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT SECTION -->
+  <section class="content">
+    <div class="scroll-section hero-section">
+      <h2>Engineering Intelligent Worlds</h2>
+      <p>ProxyWorks imagines living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
+    </div>
+
+    <div class="scroll-section">
+      <h2>The Future of Storytelling</h2>
+      <p>ProxyWorks imagines living, breathing worlds where your adventures grow with you, driven by dynamic AI storytelling.</p>
+    </div>
+
+    <div class="scroll-section">
+      <h2>Your Invisible Gamesmaster</h2>
+      <p>ProxyWorks dynamically crafts worlds, characters, and plots — weaving new stories from your every move.</p>
+    </div>
+
+    <div class="scroll-section">
+      <h2>Join the Journey</h2>
+      <p>ProxyWorks is just beginning. Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.</p>
+    </div>
+
+    <!-- ✅ Final spacer ensures footer is reachable after scroll -->
+    <div style="height: 1000px;"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    /********************************************************************
+     * Carousel Setup
+     ********************************************************************/
+    const SCROLL_THRESHOLD = 1000;
+    const PANEL_COUNT = 4;
+    const RADIUS = 350;
+    const MIN_SCALE = 0.3;
+    const MAX_SCALE = 0.85;
+    const FADE_EXPONENT = 2;
+
+    const ring = document.getElementById('ring');
+    const panels = [...ring.children];
+    const slice = 360 / PANEL_COUNT;
+
+    panels.forEach((p, i) => {
+      p.dataset.base = slice * i;
+    });
+
+    let currentIndex = -1;
+    let yaw = 0;
+
+    function render() {
+      ring.style.transform = `rotateY(${yaw}deg)`;
+
+      panels.forEach(p => {
+        const base = +p.dataset.base;
+        const rel = (base + yaw) % 360;
+        const rad = rel * Math.PI / 180;
+        const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+        const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+
+        p.style.opacity = vis;
+        p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+      });
+
+      panels
+        .map(p => ({
+          panel: p,
+          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+        }))
+        .sort((a, b) => a.depth - b.depth)
+        .forEach(o => ring.appendChild(o.panel));
+    }
+
+    function onScroll() {
+      let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
+      idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        yaw = -slice * idx;
+        render();
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /********************************************************************
+     * Footer Fade-In Observer
+     ********************************************************************/
+    const footer = document.querySelector('footer');
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            footer.classList.add('visible');
+            observer.disconnect();
+          }
+        });
+      }, {
+        threshold: 0.1
+      });
+
+      observer.observe(footer);
+    } else {
+      footer.classList.add('visible');
+    }
+  </script>
+</body>
+</html>
