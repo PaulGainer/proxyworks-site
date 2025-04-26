@@ -135,9 +135,12 @@
 
     /* ✨ Scroll Arrow */
     .scroll-arrow {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 10px solid rgba(16, 31, 36, 0.25); /* Dark brand color */
       margin-top: 20px;
-      font-size: 24px;
-      color: rgba(16, 31, 36, 0.4); /* Subtle darker arrow now against white */
       animation: arrow-bob 2s infinite ease-in-out;
       pointer-events: none;
     }
