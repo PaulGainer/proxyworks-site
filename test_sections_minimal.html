@@ -345,11 +345,15 @@
   }
   
   /********************************************************************
-   * Shimmering Grid Background with Scroll Drift
+   * Shimmering Grid Background with Smooth Scroll Drift
    ********************************************************************/
   const canvas = document.getElementById('grid-canvas');
   const ctx = canvas.getContext('2d');
   let offset = 0;
+  
+  // 🎯 New variables for smooth scroll drift
+  let targetDrift = 0;
+  let currentDrift = 0;
   
   function resizeCanvas() {
     canvas.width = canvas.clientWidth;
@@ -365,7 +369,8 @@
     const moveSpeed = 0.05;
     offset += moveSpeed;
   
-    const verticalDrift = window.scrollY * 0.1; // 🎯 Drift factor
+    targetDrift = window.scrollY * 0.1;
+    currentDrift += (targetDrift - currentDrift) * 0.05; // 🎯 Smooth easing toward target
   
     for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
       ctx.beginPath();
@@ -374,7 +379,7 @@
       ctx.stroke();
     }
   
-    for (let y = -spacing + ((offset + verticalDrift) % spacing); y < canvas.height; y += spacing) {
+    for (let y = -spacing + ((offset + currentDrift) % spacing); y < canvas.height; y += spacing) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
