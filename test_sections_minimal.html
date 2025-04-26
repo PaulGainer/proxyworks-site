@@ -139,11 +139,13 @@
       height: 0;
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
-      border-top: 10px solid rgba(16, 31, 36, 0.25); /* Dark brand color */
+      border-top: 10px solid rgba(16, 31, 36, 0.4); /* Brand dark color */
       margin-top: 20px;
       animation: arrow-bob 2s infinite ease-in-out;
       pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(16, 31, 36, 0.2)); /* ✨ Soft glow effect */
     }
+
 
     @keyframes arrow-bob {
       0%, 100% {
@@ -258,7 +260,7 @@
       <p class="fade-in-paragraph">ProxyWorks imagines living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
 
       <!-- 🎯 Correct placement: Scroll Arrow inside the first section -->
-      <div class="scroll-arrow">↓</div>
+      <div class="scroll-arrow"></div>
     </div>
 
     <div class="scroll-section">
