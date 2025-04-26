@@ -112,7 +112,6 @@
       user-drag: none;
     }
 
-    /* ✨ Breathing animation */
     @keyframes breathe {
       0%, 100% {
         transform: scale(1);
@@ -275,7 +274,6 @@
         p.style.opacity = vis;
         p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
 
-        // Breathing logic
         if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
           p.classList.add('breathing');
         } else {
@@ -306,7 +304,7 @@
     onScroll();
 
     /********************************************************************
-     * Footer and Section Fade
+     * Footer + Section Fade
      ********************************************************************/
     const footer = document.querySelector('footer');
 
@@ -344,11 +342,10 @@
     }
 
     /********************************************************************
-     * Shimmering Grid Background
+     * Shimmering Grid with Correct Radial Mask
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
-
     let offset = 0;
 
     function resizeCanvas() {
@@ -379,6 +376,19 @@
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
       }
+
+      // ✅ Correct radial fade: center transparent, edges visible
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
+      );
+      gradient.addColorStop(0, "rgba(16,31,36,0)");
+      gradient.addColorStop(1, "rgba(16,31,36,1)");
+
+      ctx.fillStyle = gradient;
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = 'source-over';
     }
 
     function animate() {
