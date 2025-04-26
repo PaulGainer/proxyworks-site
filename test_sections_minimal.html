@@ -64,6 +64,7 @@
     .scene {
       perspective: 1200px;
       z-index: 2;
+      transition: transform 0.4s ease-out;
     }
 
     .ring {
@@ -114,12 +115,8 @@
 
     /* ✨ Breathing animation */
     @keyframes breathe {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.03);
-      }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
     }
 
     .breathing img {
@@ -202,7 +199,7 @@
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
-    <div class="scene">
+    <div class="scene" id="scene">
       <div class="ring" id="ring">
         <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
         <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" draggable="false" /></div></div>
@@ -252,6 +249,7 @@
     const FADE_EXPONENT = 2;
 
     const ring = document.getElementById('ring');
+    const scene = document.getElementById('scene');
     const panels = [...ring.children];
     const slice = 360 / PANEL_COUNT;
 
@@ -275,7 +273,6 @@
         p.style.opacity = vis;
         p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
 
-        // Breathing logic
         if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
           p.classList.add('breathing');
         } else {
@@ -306,10 +303,19 @@
     onScroll();
 
     /********************************************************************
+     * Tiny Parallax Float
+     ********************************************************************/
+    window.addEventListener('mousemove', e => {
+      const { innerWidth, innerHeight } = window;
+      const x = (e.clientX / innerWidth - 0.5) * 10; // max 5 deg
+      const y = (e.clientY / innerHeight - 0.5) * 10;
+      scene.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
+    });
+
+    /********************************************************************
      * Footer and Section Fade
      ********************************************************************/
     const footer = document.querySelector('footer');
-
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -319,14 +325,12 @@
           }
         });
       }, { threshold: 0.1 });
-
       observer.observe(footer);
     } else {
       footer.classList.add('visible');
     }
 
     const sections = document.querySelectorAll('.scroll-section');
-
     if ('IntersectionObserver' in window) {
       const sectionObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -335,7 +339,6 @@
           }
         });
       }, { threshold: 0.5 });
-
       sections.forEach(section => {
         sectionObserver.observe(section);
       });
@@ -348,7 +351,6 @@
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
-
     let offset = 0;
 
     function resizeCanvas() {
@@ -363,7 +365,6 @@
 
       const spacing = 40;
       const moveSpeed = 0.05;
-
       offset += moveSpeed;
 
       for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
@@ -372,7 +373,6 @@
         ctx.lineTo(x, canvas.height);
         ctx.stroke();
       }
-
       for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
         ctx.beginPath();
         ctx.moveTo(0, y);
