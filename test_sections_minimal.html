@@ -9,8 +9,7 @@
 
   <style>
     :root {
-      --brand-bg-start: #101f24; /* Darker blue */
-      --brand-bg-mid:   #162b31; /* Slightly lighter blue */
+      --brand-bg: #101f24;
       --text-muted: #888888;
       --hero-height-desktop: 320px;
       --hero-height-mobile: 240px;
@@ -24,7 +23,7 @@
 
     body {
       background: #ffffff;
-      color: var(--brand-bg-start);
+      color: var(--brand-bg);
       font-family: system-ui, -apple-system, BlinkMacSystemFont,
                    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
                    "Open Sans", "Helvetica Neue", sans-serif;
@@ -38,23 +37,11 @@
       width: 100%;
       height: var(--hero-height-desktop);
       z-index: 100;
-      background-color: var(--brand-bg-start);
+      background: var(--brand-bg);
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      animation: breatheBackground 25s ease-in-out infinite;
-      animation-fill-mode: both; /* ✨ add this line */
-    }
-
-
-    .hero.breath-fast {
-      animation: breatheBackground 6s ease-in-out infinite;
-    }
-
-    @keyframes breatheBackground {
-      0%, 100% { background-color: var(--brand-bg-start); }
-      50% { background-color: var(--brand-bg-mid); }
     }
 
     @media (max-width: 768px) {
@@ -63,7 +50,6 @@
       }
     }
 
-    /* Shimmering background canvas */
     #grid-canvas {
       position: absolute;
       top: 0;
@@ -101,7 +87,7 @@
       position: absolute;
       inset: 0;
       transform-style: preserve-3d;
-      background: transparent;
+      background: var(--brand-bg);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -127,20 +113,22 @@
       user-drag: none;
     }
 
-    /* Carousel panel breathing animation */
     @keyframes breathe {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.03);
+      }
     }
 
     .breathing img {
       animation: breathe 8s ease-in-out infinite;
     }
 
-    /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
-      color: var(--brand-bg-start);
+      color: var(--brand-bg);
       padding-top: var(--hero-height-desktop);
     }
 
@@ -192,7 +180,6 @@
       opacity: 0.85;
     }
 
-    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -212,7 +199,6 @@
 </head>
 
 <body>
-  <!-- HERO SECTION -->
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
@@ -226,7 +212,6 @@
     </div>
   </section>
 
-  <!-- CONTENT SECTION -->
   <section class="content">
     <div class="scroll-section hero-section">
       <h2>Engineering Intelligent Worlds</h2>
@@ -251,14 +236,13 @@
     <div style="height: 300px;"></div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
 
   <script>
     /********************************************************************
-     * Carousel Setup + Breathing Trigger
+     * Carousel Setup
      ********************************************************************/
     const SCROLL_THRESHOLD = 600;
     const PANEL_COUNT = 4;
@@ -270,7 +254,6 @@
     const ring = document.getElementById('ring');
     const panels = [...ring.children];
     const slice = 360 / PANEL_COUNT;
-    const hero = document.querySelector('.hero');
 
     panels.forEach((p, i) => {
       p.dataset.base = slice * i;
@@ -315,13 +298,6 @@
         currentIndex = idx;
         yaw = -slice * idx;
         render();
-
-        // Speed up breathing temporarily
-        hero.classList.add('breath-fast');
-        clearTimeout(hero._breathTimer);
-        hero._breathTimer = setTimeout(() => {
-          hero.classList.remove('breath-fast');
-        }, 2000);
       }
     }
 
@@ -367,7 +343,7 @@
     }
 
     /********************************************************************
-     * Shimmering Grid Background
+     * Shimmering Grid Background + Center Fade
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
@@ -386,8 +362,19 @@
 
       const spacing = 40;
       const moveSpeed = 0.05;
-
       offset += moveSpeed;
+
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(canvas.width, canvas.height) / 2);
+      gradient.addColorStop(0, "rgba(255,255,255,0)");
+      gradient.addColorStop(0.5, "rgba(255,255,255,0.02)");
+      gradient.addColorStop(1, "rgba(255,255,255,0.05)");
+
+      ctx.strokeStyle = gradient;
+
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
 
       for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
         ctx.beginPath();
@@ -402,6 +389,8 @@
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
       }
+
+      ctx.restore();
     }
 
     function animate() {
