@@ -9,7 +9,8 @@
 
   <style>
     :root {
-      --brand-bg: #101f24;
+      --brand-bg-start: #101f24; /* Darker blue */
+      --brand-bg-mid:   #162b31; /* Slightly lighter blue */
       --text-muted: #888888;
       --hero-height-desktop: 320px;
       --hero-height-mobile: 240px;
@@ -23,7 +24,7 @@
 
     body {
       background: #ffffff;
-      color: var(--brand-bg);
+      color: var(--brand-bg-start);
       font-family: system-ui, -apple-system, BlinkMacSystemFont,
                    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
                    "Open Sans", "Helvetica Neue", sans-serif;
@@ -37,40 +38,21 @@
       width: 100%;
       height: var(--hero-height-desktop);
       z-index: 100;
-      background: var(--brand-bg);
+      background-color: var(--brand-bg-start);
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+      animation: breatheBackground 25s ease-in-out infinite;
     }
 
-    /* ✨ Visible radial breathing overlay */
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(
-        circle at center,
-        rgba(130, 200, 255, 0.15) 0%,
-        rgba(130, 200, 255, 0.1) 30%,
-        rgba(16, 31, 36, 0) 70%
-      );
-      opacity: 0.3;
-      animation: breatheOverlay 25s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 3;
+    .hero.breath-fast {
+      animation: breatheBackground 6s ease-in-out infinite;
     }
 
-    .hero.breath-fast::before {
-      animation: breatheOverlay 6s ease-in-out infinite;
-    }
-
-    @keyframes breatheOverlay {
-      0%, 100% { opacity: 0.15; }
-      50% { opacity: 0.4; }
+    @keyframes breatheBackground {
+      0%, 100% { background-color: var(--brand-bg-start); }
+      50% { background-color: var(--brand-bg-mid); }
     }
 
     @media (max-width: 768px) {
@@ -79,6 +61,7 @@
       }
     }
 
+    /* Shimmering background canvas */
     #grid-canvas {
       position: absolute;
       top: 0;
@@ -116,7 +99,7 @@
       position: absolute;
       inset: 0;
       transform-style: preserve-3d;
-      background: var(--brand-bg);
+      background: transparent;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -142,7 +125,7 @@
       user-drag: none;
     }
 
-    /* ✨ Breathing animation for centered carousel panel */
+    /* Carousel panel breathing animation */
     @keyframes breathe {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.03); }
@@ -155,7 +138,7 @@
     /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
-      color: var(--brand-bg);
+      color: var(--brand-bg-start);
       padding-top: var(--hero-height-desktop);
     }
 
@@ -272,9 +255,161 @@
   </footer>
 
   <script>
-    /* Same JavaScript as previously provided */
-    // (handling carousel breathing, scroll detection, shimmer grid)
-    /* I can include it again if you want in the next message (optional)! */
+    /********************************************************************
+     * Carousel Setup + Breathing Trigger
+     ********************************************************************/
+    const SCROLL_THRESHOLD = 600;
+    const PANEL_COUNT = 4;
+    const RADIUS = 350;
+    const MIN_SCALE = 0.3;
+    const MAX_SCALE = 0.85;
+    const FADE_EXPONENT = 2;
+
+    const ring = document.getElementById('ring');
+    const panels = [...ring.children];
+    const slice = 360 / PANEL_COUNT;
+    const hero = document.querySelector('.hero');
+
+    panels.forEach((p, i) => {
+      p.dataset.base = slice * i;
+    });
+
+    let currentIndex = -1;
+    let yaw = 0;
+
+    function render() {
+      ring.style.transform = `rotateY(${yaw}deg)`;
+
+      panels.forEach(p => {
+        const base = +p.dataset.base;
+        const rel = (base + yaw) % 360;
+        const rad = rel * Math.PI / 180;
+        const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+        const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+
+        p.style.opacity = vis;
+        p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+
+        if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
+          p.classList.add('breathing');
+        } else {
+          p.classList.remove('breathing');
+        }
+      });
+
+      panels
+        .map(p => ({
+          panel: p,
+          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+        }))
+        .sort((a, b) => a.depth - b.depth)
+        .forEach(o => ring.appendChild(o.panel));
+    }
+
+    function onScroll() {
+      let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
+      idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        yaw = -slice * idx;
+        render();
+
+        // Speed up breathing temporarily
+        hero.classList.add('breath-fast');
+        clearTimeout(hero._breathTimer);
+        hero._breathTimer = setTimeout(() => {
+          hero.classList.remove('breath-fast');
+        }, 2000);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /********************************************************************
+     * Footer and Section Fade
+     ********************************************************************/
+    const footer = document.querySelector('footer');
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            footer.classList.add('visible');
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.1 });
+
+      observer.observe(footer);
+    } else {
+      footer.classList.add('visible');
+    }
+
+    const sections = document.querySelectorAll('.scroll-section');
+
+    if ('IntersectionObserver' in window) {
+      const sectionObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.5 });
+
+      sections.forEach(section => {
+        sectionObserver.observe(section);
+      });
+    } else {
+      sections.forEach(section => section.classList.add('visible'));
+    }
+
+    /********************************************************************
+     * Shimmering Grid Background
+     ********************************************************************/
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let offset = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+
+      const spacing = 40;
+      const moveSpeed = 0.05;
+
+      offset += moveSpeed;
+
+      for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function animate() {
+      drawGrid();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animate();
   </script>
 </body>
 </html>
