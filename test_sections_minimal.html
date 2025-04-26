@@ -29,9 +29,8 @@
                    "Open Sans", "Helvetica Neue", sans-serif;
     }
 
-    /* ───── HERO ───── */
     .hero {
-      position: fixed; /* ✅ NOW FIXED */
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -50,7 +49,6 @@
       }
     }
 
-    /* Background grid canvas */
     #grid-canvas {
       position: absolute;
       top: 0;
@@ -114,11 +112,10 @@
       user-drag: none;
     }
 
-    /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
       color: var(--brand-bg);
-      padding-top: var(--hero-height-desktop); /* ✅ OFFSET the fixed hero */
+      padding-top: var(--hero-height-desktop);
     }
 
     @media (max-width: 768px) {
@@ -135,7 +132,6 @@
       align-items: center;
       padding: 20px;
       text-align: center;
-
       opacity: 0;
       transform: translateY(40px);
       transition: opacity 0.8s ease-out, transform 0.8s ease-out;
@@ -170,7 +166,6 @@
       opacity: 0.85;
     }
 
-    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -190,7 +185,6 @@
 </head>
 
 <body>
-  <!-- HERO SECTION -->
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
@@ -204,7 +198,6 @@
     </div>
   </section>
 
-  <!-- CONTENT SECTION -->
   <section class="content">
     <div class="scroll-section hero-section">
       <h2>Engineering Intelligent Worlds</h2>
@@ -229,12 +222,10 @@
     <div style="height: 300px;"></div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
 
-  <!-- SCRIPTS -->
   <script>
     /********************************************************************
      * Carousel Setup
@@ -294,7 +285,7 @@
     onScroll();
 
     /********************************************************************
-     * Footer Fade-In
+     * Footer and Section Fade
      ********************************************************************/
     const footer = document.querySelector('footer');
 
@@ -313,9 +304,6 @@
       footer.classList.add('visible');
     }
 
-    /********************************************************************
-     * Section Fade-In
-     ********************************************************************/
     const sections = document.querySelectorAll('.scroll-section');
 
     if ('IntersectionObserver' in window) {
@@ -335,51 +323,55 @@
     }
 
     /********************************************************************
-     * Shimmering Grid Background
+     * Starfield Background
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
-
-    let offset = 0;
+    let stars = [];
 
     function resizeCanvas() {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+      generateStars();
     }
 
-    function drawGrid() {
+    function generateStars() {
+      stars = [];
+      for (let i = 0; i < 80; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.2 + 0.5,
+          vx: (Math.random() - 0.5) * 0.05,
+          vy: (Math.random() - 0.5) * 0.05
+        });
+      }
+    }
+
+    function drawStars() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
-
-      const spacing = 40;
-      const moveSpeed = 0.05;
-
-      offset += moveSpeed;
-
-      for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      for (let star of stars) {
         ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = -spacing + (offset % spacing); y < canvas.height; y += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+        ctx.fill();
       }
     }
 
-    function animate() {
-      drawGrid();
-      requestAnimationFrame(animate);
+    function animateStars() {
+      for (let star of stars) {
+        star.x += star.vx;
+        star.y += star.vy;
+        if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
+        if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
+      }
+      drawStars();
+      requestAnimationFrame(animateStars);
     }
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    animate();
+    animateStars();
   </script>
 </body>
 </html>
