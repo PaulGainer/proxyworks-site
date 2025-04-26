@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ProxyWorks – AI-powered storytelling systems for tabletop roleplaying games." />
+  <meta name="author" content="ProxyWorks Ltd" />
+  <title>ProxyWorks</title>
+
+  <style>
+    /* ───────── RESET ───────── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font: inherit;
+    }
+
+    /* ───── VARIABLES & COLOURS ───── */
+    :root {
+      --brand-bg: #101f24;
+      --text-muted: #888888;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: var(--brand-bg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                   "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
+    }
+
+    /* ───────── HERO (carousel) ───────── */
+    .hero {
+      background: var(--brand-bg);
+      overflow: hidden;                          /* hide overflow of taller ring */
+      height: calc(320px * 2 / 3);               /* 2/3 of original 320px */
+      display: flex; justify-content: center; align-items: center;
+    }
+    .scene {
+      perspective: 1200px;
+    }
+    .ring {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      transform-style: preserve-3d;
+      transform-origin: center;
+      transition: transform 0.4s ease;           /* snap animation */
+    }
+    .panel {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      background: var(--brand-bg);               /* back-plate hides behind panels */
+      transition: transform 0.4s ease,
+                  opacity 0.4s ease;            /* smooth fade & scale */
+    }
+    .panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      backface-visibility: hidden;
+      pointer-events: none;
+      user-drag: none;
+    }
+
+    /* ───────── CONTENT SECTION ───────── */
+    .content {
+      background: #ffffff;
+      color: var(--brand-bg);
+      padding: 40px 20px;
+      /* min-height will be set via JS for scroll testing */
+    }
+    .content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .content p {
+      font-size: 1.25rem;
+      margin: 0 auto 1rem;
+      max-width: 700px;
+      opacity: 0.85;
+      text-align: center;
+    }
+
+    /* ───────── FOOTER ───────── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HERO: scroll-triggered carousel -->
+  <section class="hero">
+    <div class="scene">
+      <div class="ring" id="ring">
+        <!-- Only 4 panels as requested -->
+        <div class="panel"><img src="images/logo.png" alt="Logo 1" draggable="false"></div>
+        <div class="panel"><img src="images/logo.png" alt="Logo 2" draggable="false"></div>
+        <div class="panel"><img src="images/logo.png" alt="Logo 3" draggable="false"></div>
+        <div class="panel"><img src="images/logo.png" alt="Logo 4" draggable="false"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT: tall enough to scroll through all 4 slides -->
+  <section class="content">
+    <h2>Engineering Intelligent Worlds</h2>
+    <p>
+      An AI-powered GM system for narrative-driven tabletop roleplaying games.<br />
+      We're building something epic — one system, one story, one world at a time.
+    </p>
+    <p class="email">📬 contact@proxyworks.net</p>
+    <!-- extra space so footer isn't at very bottom -->
+    <div style="height:200px;"></div>
+  </section>
+
+  <!-- LEGAL FOOTER -->
+  <footer>
+    ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
+  </footer>
+
+  <script>
+    /********************************************************************
+     * Configuration constants
+     ********************************************************************/
+    const SCROLL_THRESHOLD = 1000;   // px of scroll → advance one slide
+    const PANEL_COUNT      = 4;      // number of panels
+    const RADIUS           = 350;    // px from centre to panel
+    const MIN_SCALE        = 0.3;    // scale at side/back
+    const FADE_EXPONENT    = 2;      // cos^exp fade curve
+    const BASE_SIZE        = 320;    // panel footprint (px)
+
+    /**
+     * Calculate the dynamic max scale so the centered logo
+     * occupies ~75% of viewport width.
+     */
+    function calcMaxScale() {
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      return 0.75 * vw / BASE_SIZE;
+    }
+
+    let MAX_SCALE = calcMaxScale();
+
+    // Recompute max scale on resize
+    window.addEventListener('resize', () => {
+      MAX_SCALE = calcMaxScale();
+      render();
+    });
+
+    /********************************************************************
+     * Carousel setup
+     ********************************************************************/
+    const ring   = document.getElementById('ring');
+    const panels = [...ring.children];
+    const slice  = 360 / PANEL_COUNT;
+
+    // One-time record of each panel's base angle
+    panels.forEach((p, i) => {
+      p.dataset.base = slice * i;
+    });
+
+    // Ensure content is tall enough for scrolling through all panels
+    const content = document.querySelector('.content');
+    content.style.minHeight = (SCROLL_THRESHOLD * PANEL_COUNT) + 'px';
+
+    let currentIndex = -1;  // which panel is front
+    let yaw          = 0;   // current rotation in degrees
+
+    /**
+     * Render the ring: rotate, fade, scale, and re-order panels
+     */
+    function render() {
+      // 1) rotate ring to bring currentIndex front
+      ring.style.transform = `rotateY(${yaw}deg)`;
+
+      // 2) update each panel's fade & scale
+      panels.forEach(p => {
+        const base = +p.dataset.base;
+        const rel  = (base + yaw) % 360;
+        const rad  = rel * Math.PI / 180;
+        const vis  = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+        const scl  = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+
+        p.style.opacity   = vis;
+        p.style.transform =
+          `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+      });
+
+      // 3) occlusion via painter's algorithm: back-to-front DOM order
+      const ordered = panels
+        .map(p => ({
+          panel: p,
+          depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+        }))
+        .sort((a, b) => a.depth - b.depth)
+        .map(o => o.panel);
+
+      ordered.forEach(p => ring.appendChild(p));
+    }
+
+    /**
+     * On scroll: determine which panel to show and snap to it
+     */
+    function onScroll() {
+      let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
+      if (idx < 0) idx = 0;
+      if (idx > PANEL_COUNT - 1) idx = PANEL_COUNT - 1;
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        // Negative yaw brings panel 'idx' to front
+        yaw = -slice * currentIndex;
+        render();
+      }
+    }
+
+    // Attach scroll listener, initially render slide 0
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+</html>
