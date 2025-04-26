@@ -90,7 +90,7 @@
     }
 
     .scroll-section {
-      height: 1000px; /* ✅ Each scroll section exactly 1000px high */
+      height: 1000px; /* ✅ Default for scroll matching */
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -109,6 +109,12 @@
       font-size: 1.25rem;
       max-width: 700px;
       opacity: 0.85;
+    }
+
+    /* Special first scroll-section behavior */
+    .hero-section {
+      min-height: 100vh; /* ✅ Fill full viewport height on first load */
+      height: auto;      /* ✅ Allow growing if needed */
     }
 
     /* ───── FOOTER ───── */
@@ -145,7 +151,7 @@
 
   <!-- CONTENT SECTION -->
   <section class="content">
-    <div class="scroll-section">
+    <div class="scroll-section hero-section">
       <h2>Engineering Intelligent Worlds</h2>
       <p>ProxyWorks imagines living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
     </div>
@@ -174,9 +180,9 @@
   <!-- SCRIPTS -->
   <script>
     /********************************************************************
-     * Carousel Setup (Unchanged except for 4 panels now)
+     * Carousel Setup
      ********************************************************************/
-    const SCROLL_THRESHOLD = 1000; // ✅ one panel per 1000px scroll
+    const SCROLL_THRESHOLD = 1000;
     const PANEL_COUNT = 4;
     const RADIUS = 350;
     const MIN_SCALE = 0.3;
