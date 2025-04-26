@@ -11,6 +11,8 @@
     :root {
       --brand-bg: #101f24;
       --text-muted: #888888;
+      --hero-height-desktop: 320px;
+      --hero-height-mobile: 240px;
     }
 
     * {
@@ -29,31 +31,22 @@
 
     /* ───── HERO ───── */
     .hero {
-      position: sticky;
+      position: fixed; /* ✅ NOW FIXED */
       top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--hero-height-desktop);
       z-index: 100;
       background: var(--brand-bg);
       overflow: hidden;
-      height: 320px;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
     }
 
     @media (max-width: 768px) {
       .hero {
-        height: 240px;
-      }
-
-      .hero-section {
-        height: calc(100vh - 240px);
-        min-height: 480px;
-      }
-
-      .ring {
-        width: 240px;
-        height: 240px;
+        height: var(--hero-height-mobile);
       }
     }
 
@@ -66,9 +59,8 @@
       height: 100%;
       z-index: 1;
       pointer-events: none;
-
-      will-change: transform, opacity; /* ✅ Critical fix */
-      transform: translateZ(0);          /* ✅ Force GPU acceleration */
+      will-change: transform, opacity;
+      transform: translateZ(0);
     }
 
     .scene {
@@ -83,6 +75,13 @@
       transform-style: preserve-3d;
       transform-origin: center;
       transition: transform 0.4s ease;
+    }
+
+    @media (max-width: 768px) {
+      .ring {
+        width: 240px;
+        height: 240px;
+      }
     }
 
     .panel {
@@ -119,6 +118,13 @@
     .content {
       background: #ffffff;
       color: var(--brand-bg);
+      padding-top: var(--hero-height-desktop); /* ✅ OFFSET the fixed hero */
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding-top: var(--hero-height-mobile);
+      }
     }
 
     .scroll-section {
@@ -141,8 +147,15 @@
     }
 
     .hero-section {
-      height: calc(100vh - 320px);
+      height: calc(100vh - var(--hero-height-desktop));
       min-height: 680px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section {
+        height: calc(100vh - var(--hero-height-mobile));
+        min-height: 480px;
+      }
     }
 
     .scroll-section h2 {
@@ -179,7 +192,6 @@
 <body>
   <!-- HERO SECTION -->
   <section class="hero">
-    <!-- Grid shimmer canvas -->
     <canvas id="grid-canvas"></canvas>
 
     <div class="scene">
