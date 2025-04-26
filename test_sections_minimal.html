@@ -41,6 +41,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      transition: transform 0.5s ease-out; /* ✅ smooth hero parallax */
     }
 
     @media (max-width: 768px) {
@@ -64,7 +65,6 @@
     .scene {
       perspective: 1200px;
       z-index: 2;
-      transition: transform 0.4s ease-out;
     }
 
     .ring {
@@ -199,7 +199,7 @@
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
-    <div class="scene" id="scene">
+    <div class="scene">
       <div class="ring" id="ring">
         <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
         <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" draggable="false" /></div></div>
@@ -249,7 +249,6 @@
     const FADE_EXPONENT = 2;
 
     const ring = document.getElementById('ring');
-    const scene = document.getElementById('scene');
     const panels = [...ring.children];
     const slice = 360 / PANEL_COUNT;
 
@@ -303,13 +302,15 @@
     onScroll();
 
     /********************************************************************
-     * Tiny Parallax Float
+     * Floating Hero Parallax Drift
      ********************************************************************/
+    const hero = document.querySelector('.hero');
+
     window.addEventListener('mousemove', e => {
       const { innerWidth, innerHeight } = window;
-      const x = (e.clientX / innerWidth - 0.5) * 10; // max 5 deg
+      const x = (e.clientX / innerWidth - 0.5) * 10; // ±5 degrees
       const y = (e.clientY / innerHeight - 0.5) * 10;
-      scene.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
+      hero.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
     });
 
     /********************************************************************
