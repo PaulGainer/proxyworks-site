@@ -112,7 +112,7 @@
       user-drag: none;
     }
 
-    /* ✨ Breathing animation */
+    /* ✨ Breathing animation for center image */
     @keyframes breathe {
       0%, 100% {
         transform: scale(1);
@@ -197,8 +197,8 @@
     }
   </style>
 </head>
-
 <body>
+  <!-- HERO SECTION -->
   <section class="hero">
     <canvas id="grid-canvas"></canvas>
 
@@ -212,6 +212,7 @@
     </div>
   </section>
 
+  <!-- CONTENT SECTION -->
   <section class="content">
     <div class="scroll-section hero-section">
       <h2>Engineering Intelligent Worlds</h2>
@@ -236,10 +237,12 @@
     <div style="height: 300px;"></div>
   </section>
 
+  <!-- FOOTER -->
   <footer>
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
 
+  <!-- SCRIPTS -->
   <script>
     /********************************************************************
      * Carousel Setup
@@ -344,19 +347,31 @@
     }
 
     /********************************************************************
-     * Shimmering Grid Background
+     * Shimmering Grid + Twinkle Background
      ********************************************************************/
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
 
     let offset = 0;
+    const twinkles = [];
 
     function resizeCanvas() {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+
+      // Generate random twinkle points
+      twinkles.length = 0;
+      for (let i = 0; i < 20; i++) {
+        twinkles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          life: Math.random() * 2000 + 1000,
+          age: 0
+        });
+      }
     }
 
-    function drawGrid() {
+    function drawGridAndTwinkles(delta) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
       ctx.lineWidth = 1;
@@ -379,10 +394,34 @@
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
       }
+
+      // Draw twinkles
+      for (let t of twinkles) {
+        t.age += delta;
+        let brightness = Math.sin((t.age / t.life) * Math.PI);
+        if (brightness > 0) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${brightness * 0.2})`;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (t.age > t.life) {
+          t.x = Math.random() * canvas.width;
+          t.y = Math.random() * canvas.height;
+          t.life = Math.random() * 2000 + 1000;
+          t.age = 0;
+        }
+      }
     }
 
+    let lastTime = performance.now();
+
     function animate() {
-      drawGrid();
+      const now = performance.now();
+      const delta = now - lastTime;
+      lastTime = now;
+
+      drawGridAndTwinkles(delta);
       requestAnimationFrame(animate);
     }
 
