@@ -135,23 +135,19 @@
 
     /* ✨ Scroll Arrow */
     .scroll-arrow {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-top: 20px;
       font-size: 24px;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(16, 31, 36, 0.4); /* Subtle darker arrow now against white */
       animation: arrow-bob 2s infinite ease-in-out;
       pointer-events: none;
-      z-index: 3;
     }
 
     @keyframes arrow-bob {
       0%, 100% {
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
       }
       50% {
-        transform: translateX(-50%) translateY(8px);
+        transform: translateY(8px);
       }
     }
 
@@ -176,6 +172,7 @@
       align-items: center;
       padding: 20px;
       text-align: center;
+      position: relative; /* Needed to position arrow relative to section */
     }
 
     .hero-section {
@@ -250,14 +247,15 @@
         <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Join" draggable="false" /></div></div>
       </div>
     </div>
-
-    <div class="scroll-arrow">↓</div> <!-- 🎯 Subtle floating scroll hint -->
   </section>
 
   <section class="content">
     <div class="scroll-section hero-section">
       <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
       <p class="fade-in-paragraph">ProxyWorks imagines living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
+
+      <!-- 🎯 Correct placement: Scroll Arrow inside the first section -->
+      <div class="scroll-arrow">↓</div>
     </div>
 
     <div class="scroll-section">
@@ -281,8 +279,6 @@
   <footer>
     ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
   </footer>
-
-<!-- ✅ Scripts will remain the same as previously finalized — so everything works -->
 
   <script>
     /********************************************************************
