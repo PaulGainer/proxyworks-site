@@ -38,7 +38,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative; /* ✅ Needed for layering canvas */
+      position: relative;
     }
 
     @media (max-width: 768px) {
@@ -66,11 +66,14 @@
       height: 100%;
       z-index: 1;
       pointer-events: none;
+
+      will-change: transform, opacity; /* ✅ Critical fix */
+      transform: translateZ(0);          /* ✅ Force GPU acceleration */
     }
 
     .scene {
       perspective: 1200px;
-      z-index: 2; /* Carousel sits above canvas */
+      z-index: 2;
     }
 
     .ring {
@@ -176,7 +179,7 @@
 <body>
   <!-- HERO SECTION -->
   <section class="hero">
-    <!-- NEW: Grid background canvas -->
+    <!-- Grid shimmer canvas -->
     <canvas id="grid-canvas"></canvas>
 
     <div class="scene">
