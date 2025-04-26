@@ -115,13 +115,13 @@
       text-align: center;
 
       opacity: 0; /* 🔵 Start hidden */
-      transform: translateY(20px); /* 🔵 Start slightly below */
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      transform: translateY(40px); /* 🔵 Bigger lift */
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* 🔵 Slower and smoother */
     }
 
     .scroll-section.visible {
-      opacity: 1; /* 🔵 Fade in */
-      transform: translateY(0); /* 🔵 Slide up into place */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .hero-section {
@@ -285,7 +285,7 @@
     }
 
     /********************************************************************
-     * Section Fade-In Observer (NEW)
+     * Section Fade-In Observer (STRONGER SETTINGS)
      ********************************************************************/
     const sections = document.querySelectorAll('.scroll-section');
 
@@ -297,7 +297,7 @@
           }
         });
       }, {
-        threshold: 0.2
+        threshold: 0.5 // 🔵 50% visible before triggering fade-in
       });
 
       sections.forEach(section => {
