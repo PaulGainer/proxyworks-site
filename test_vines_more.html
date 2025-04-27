@@ -316,7 +316,197 @@
 </footer>
 
 <script>
-// Your existing scripts (unchanged for scroll arrow, carousel, cinematic fades, background grid, etc)
+  /********************************************************************
+   * Scroll Arrow Fade Out
+   ********************************************************************/
+  const scrollArrow = document.getElementById('scroll-arrow');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 10) {
+      scrollArrow.classList.add('hidden');
+    } else {
+      scrollArrow.classList.remove('hidden');
+    }
+  });
+  
+  /********************************************************************
+   * Carousel + Cascade Fade-In + Scale
+   ********************************************************************/
+  const SCROLL_THRESHOLD = 600;
+  const PANEL_COUNT = 4;
+  const RADIUS = 350;
+  const MIN_SCALE = 0.3;
+  const MAX_SCALE = 0.85;
+  const FADE_EXPONENT = 2;
+  
+  const ring = document.getElementById('ring');
+  const panels = [...ring.children];
+  const slice = 360 / PANEL_COUNT;
+  
+  panels.forEach((p, i) => {
+    p.dataset.base = slice * i;
+  });
+  
+  let currentIndex = -1;
+  let yaw = 0;
+  
+  function render() {
+    ring.style.transform = `rotateY(${yaw}deg)`;
+  
+    panels.forEach(p => {
+      const base = +p.dataset.base;
+      const rel = (base + yaw) % 360;
+      const rad = rel * Math.PI / 180;
+      const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+      const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+  
+      p.style.opacity = vis;
+      p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+  
+      if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
+        p.classList.add('breathing');
+      } else {
+        p.classList.remove('breathing');
+      }
+    });
+  
+    panels
+      .map(p => ({
+        panel: p,
+        depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+      }))
+      .sort((a, b) => a.depth - b.depth)
+      .forEach(o => ring.appendChild(o.panel));
+  }
+  
+  function onScroll() {
+    let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
+    idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
+    if (idx !== currentIndex) {
+      currentIndex = idx;
+      yaw = -slice * idx;
+      render();
+    }
+  }
+  
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  
+  /********************************************************************
+   * Cinematic Section Text Fade
+   ********************************************************************/
+  const footer = document.querySelector('footer');
+  const sections = document.querySelectorAll('.scroll-section');
+  
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const heading = entry.target.querySelector('.fade-in-heading');
+          const paragraph = entry.target.querySelector('.fade-in-paragraph');
+          if (heading) heading.classList.add('visible');
+          if (paragraph) {
+            setTimeout(() => {
+              paragraph.classList.add('visible');
+            }, 300); // 🎯 Delay after heading
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+  
+    sections.forEach(section => observer.observe(section));
+  
+    const footerObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          footer.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+  
+    footerObserver.observe(footer);
+  } else {
+    // Fallback
+    sections.forEach(section => {
+      const heading = section.querySelector('.fade-in-heading');
+      const paragraph = section.querySelector('.fade-in-paragraph');
+      if (heading) heading.classList.add('visible');
+      if (paragraph) paragraph.classList.add('visible');
+    });
+    footer.classList.add('visible');
+  }
+  
+  /********************************************************************
+   * Shimmering Grid Background with Smooth Scroll Drift
+   ********************************************************************/
+  const canvas = document.getElementById('grid-canvas');
+  const ctx = canvas.getContext('2d');
+  let offset = 0;
+  let targetDrift = 0;
+  let currentDrift = 0;
+  
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.lineWidth = 1;
+  
+    const spacing = 40;
+    const moveSpeed = 0.03;
+    offset += moveSpeed;
+  
+    targetDrift = window.scrollY * 0.1;
+    currentDrift += (targetDrift - currentDrift) * 0.05;
+  
+    for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+  
+    for (let y = -spacing + ((offset + currentDrift) % spacing); y < canvas.height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+  
+    const gradient = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, 0,
+      canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
+    );
+    gradient.addColorStop(0, "rgba(16,31,36,0)");
+    gradient.addColorStop(1, "rgba(16,31,36,1)");
+  
+    ctx.fillStyle = gradient;
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  
+  function animate() {
+    drawGrid();
+    requestAnimationFrame(animate);
+  }
+  
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  animate();
+  
+  /********************************************************************
+   * Panel Cascade Fade+Scale on Load
+   ********************************************************************/
+  window.addEventListener('load', () => {
+    panels.forEach((panel, index) => {
+      setTimeout(() => {
+        panel.classList.add('visible');
+      }, index * 150);
+    });
+  });
 </script>
 
 </body>
