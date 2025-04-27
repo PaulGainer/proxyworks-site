@@ -453,29 +453,31 @@
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
   
-      // 🌿 NEW: Proper fade logic
       const rect = vine.getBoundingClientRect();
-      const heroHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-height-desktop')) || 320;
-      const fadeZone = window.innerHeight * 0.1; // 10% fade zone
+      const heroHeight = window.innerWidth < 768 ? 240 : 320; // mobile vs desktop hero height
+      const fadeZone = window.innerHeight * 0.1; // 10% of screen height
   
       let opacity = 1;
   
-      // Bottom fade
+      // Fade near bottom of viewport
       if (rect.bottom > window.innerHeight - fadeZone) {
-        const excess = rect.bottom - (window.innerHeight - fadeZone);
-        opacity = Math.max(0, 1 - (excess / fadeZone));
+        const distanceFromBottom = rect.bottom - (window.innerHeight - fadeZone);
+        opacity = Math.min(opacity, 1 - distanceFromBottom / fadeZone);
       }
   
-      // Top fade (relative to hero bottom)
+      // Fade near hero bottom (top of content area)
       if (rect.top < heroHeight + fadeZone) {
-        const excess = (heroHeight + fadeZone) - rect.top;
-        opacity = Math.max(0, Math.min(opacity, 1 - (excess / fadeZone)));
+        const distanceFromHeroBottom = (heroHeight + fadeZone) - rect.top;
+        opacity = Math.min(opacity, 1 - distanceFromHeroBottom / fadeZone);
       }
   
+      // Clamp between 0 and 1
       opacity = Math.max(0, Math.min(1, opacity));
-      vine.style.opacity = opacity * 0.9; // Slight cap for dreaminess
+  
+      vine.style.opacity = opacity * 0.9; // dreamy 90% max cap
     });
   }
+
 
 
   
