@@ -58,6 +58,7 @@
       height: 100%;
       z-index: 1;
       pointer-events: none;
+      will-change: transform, opacity;
       transform: translateZ(0);
     }
 
@@ -113,29 +114,35 @@
       max-height: 80%;
       max-width: 80%;
       object-fit: contain;
+      display: block;
       backface-visibility: hidden;
       pointer-events: none;
+      user-drag: none;
     }
 
     @keyframes breathe {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.03);
+      }
     }
 
     .breathing img {
       animation: breathe 8s ease-in-out infinite;
     }
 
-    /* ✨ Scroll Arrow */
+    /* ✨ Scroll Arrow with Glow */
     .scroll-arrow {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-top: 20px;
       animation: arrow-bob 2s infinite ease-in-out;
+      pointer-events: none;
       opacity: 1;
       transition: opacity 0.5s ease;
-      pointer-events: none;
     }
 
     .scroll-arrow svg {
@@ -146,8 +153,12 @@
     }
 
     @keyframes arrow-bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(8px);
+      }
     }
 
     .scroll-arrow.hidden {
@@ -168,12 +179,12 @@
     }
 
     .scroll-section {
-      min-height: 1200px;
+      min-height: 1200px; /* CHANGED */
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
-      padding: 120px 20px 20px 20px; /* big top padding to simulate centering */
+      padding: 20px;
       text-align: center;
       position: relative;
     }
@@ -181,11 +192,6 @@
     .hero-section {
       height: calc(100vh - var(--hero-height-desktop));
       min-height: 680px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
     }
 
     @media (max-width: 768px) {
@@ -195,13 +201,18 @@
       }
     }
 
+    /* ✨ Cinematic Fade-In */
     .fade-in-heading, .fade-in-paragraph {
       opacity: 0;
       transform: translateY(30px);
       transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
-    .fade-in-heading.visible,
+    .fade-in-heading.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .fade-in-paragraph.visible {
       opacity: 1;
       transform: translateY(0);
@@ -219,29 +230,38 @@
       opacity: 0.85;
     }
 
-    /* ───── VINES ───── */
+    /* ───── VINE ───── */
     .with-vines {
       position: relative;
+      min-height: 1219px; /* or whatever fits your vines */
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
     }
-
+    
     .vine-overlay {
       position: absolute;
-      top: 600px;
+      top: 620px;
       left: 50%;
       transform: translateX(-50%);
-      width: 1000px;
-      max-width: 90%;
+      width: 1050px;
+      max-width: 100%;
       opacity: 0.8;
-      pointer-events: none;
       z-index: 0;
+      pointer-events: none;
     }
-
+    
     .vine-overlay img {
       width: 100%;
       height: auto;
       filter: drop-shadow(2px 2px 0 rgba(16, 31, 36, 0.2));
     }
-
+    
+    /* Boost text above the vines */
     .with-vines h2,
     .with-vines p {
       position: relative;
@@ -269,36 +289,45 @@
 
 <body>
 
-<!-- ✨ HERO Section -->
 <section class="hero">
   <canvas id="grid-canvas"></canvas>
   <div class="scene" id="scene">
     <div class="ring" id="ring">
-      <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" /></div></div>
-      <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" /></div></div>
-      <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="Gamesmaster" /></div></div>
-      <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Journey" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" draggable="false" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/storytelling.png" alt="Vision" draggable="false" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="How" draggable="false" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Join" draggable="false" /></div></div>
     </div>
   </div>
 </section>
 
-<!-- ✨ CONTENT Section -->
 <section class="content">
   <div class="scroll-section hero-section">
     <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
     <p class="fade-in-paragraph">ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
     <div class="scroll-arrow" id="scroll-arrow">
-      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"></path></svg>
     </div>
   </div>
 
+  <!--
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">The Future of Storytelling</h2>
+    <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
+    <div class="vine-wrapper">
+      <img src="images/vines.svg" alt="Vine Illustration">
+    </div>
+  </div>
+  -->
   <div class="scroll-section with-vines">
     <div class="vine-overlay">
       <img src="images/vines.svg" alt="Vines" />
     </div>
+    
     <h2 class="fade-in-heading">The Future of Storytelling</h2>
     <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
   </div>
+  
 
   <div class="scroll-section">
     <h2 class="fade-in-heading">Your Invisible Gamesmaster</h2>
@@ -307,60 +336,81 @@
 
   <div class="scroll-section">
     <h2 class="fade-in-heading">Join the Journey</h2>
-    <p class="fade-in-paragraph">Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.</p>
+    <p class="fade-in-paragraph">ProxyWorks is just beginning. Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.</p>
   </div>
 
   <div style="height: 300px;"></div>
 </section>
 
-<!-- ✨ FOOTER -->
 <footer>
   ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
 </footer>
 
-<!-- ✨ SCRIPTS -->
 <script>
   /********************************************************************
    * Scroll Arrow Fade Out
    ********************************************************************/
   const scrollArrow = document.getElementById('scroll-arrow');
   window.addEventListener('scroll', () => {
-    scrollArrow.classList.toggle('hidden', window.scrollY > 10);
+    if (window.scrollY > 10) {
+      scrollArrow.classList.add('hidden');
+    } else {
+      scrollArrow.classList.remove('hidden');
+    }
   });
-
+  
   /********************************************************************
    * Carousel + Cascade Fade-In + Scale
    ********************************************************************/
-  const SCROLL_THRESHOLD = 950; // 🔥 lower now
+  const SCROLL_THRESHOLD = 1200;
   const PANEL_COUNT = 4;
   const RADIUS = 350;
+  const MIN_SCALE = 0.3;
+  const MAX_SCALE = 0.85;
+  const FADE_EXPONENT = 2;
+  
   const ring = document.getElementById('ring');
   const panels = [...ring.children];
   const slice = 360 / PANEL_COUNT;
-  let yaw = 0;
+  
+  panels.forEach((p, i) => {
+    p.dataset.base = slice * i;
+  });
+  
   let currentIndex = -1;
-
-  panels.forEach((p, i) => p.dataset.base = slice * i);
-
+  let yaw = 0;
+  
   function render() {
-    ring.style.transform = `rotateY(${yaw}deg)`;
+    ring.style.transform = rotateY(${yaw}deg);
+  
     panels.forEach(p => {
       const base = +p.dataset.base;
       const rel = (base + yaw) % 360;
       const rad = rel * Math.PI / 180;
-      const vis = Math.max(0, Math.cos(rad)) ** 2;
-      const scl = 0.3 + (0.85 - 0.3) * vis;
+      const vis = Math.pow(Math.max(0, Math.cos(rad)), FADE_EXPONENT);
+      const scl = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * vis;
+  
       p.style.opacity = vis;
-      p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
-      p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
+      p.style.transform = rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl});
+  
+      if (Math.abs(rel) < 20 || Math.abs(rel - 360) < 20) {
+        p.classList.add('breathing');
+      } else {
+        p.classList.remove('breathing');
+      }
     });
-    panels.sort((a, b) => Math.cos((+b.dataset.base + yaw) * Math.PI / 180) - Math.cos((+a.dataset.base + yaw) * Math.PI / 180)).forEach(p => ring.appendChild(p));
+  
+    panels
+      .map(p => ({
+        panel: p,
+        depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+      }))
+      .sort((a, b) => a.depth - b.depth)
+      .forEach(o => ring.appendChild(o.panel));
   }
-
+  
   function onScroll() {
-    // ✨ Offset scroll so the transition happens sooner
-    let adjustedY = window.scrollY - 300; // <--- Correction to account for top padding
-    let idx = Math.floor(Math.max(0, adjustedY) / SCROLL_THRESHOLD);
+    let idx = Math.floor(window.scrollY / SCROLL_THRESHOLD);
     idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
     if (idx !== currentIndex) {
       currentIndex = idx;
@@ -368,80 +418,127 @@
       render();
     }
   }
-
+  
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
-
+  
   /********************************************************************
    * Cinematic Section Text Fade
    ********************************************************************/
   const footer = document.querySelector('footer');
   const sections = document.querySelectorAll('.scroll-section');
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const heading = entry.target.querySelector('.fade-in-heading');
-        const paragraph = entry.target.querySelector('.fade-in-paragraph');
-        if (heading) heading.classList.add('visible');
-        if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
-      }
+  
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const heading = entry.target.querySelector('.fade-in-heading');
+          const paragraph = entry.target.querySelector('.fade-in-paragraph');
+          if (heading) heading.classList.add('visible');
+          if (paragraph) {
+            setTimeout(() => {
+              paragraph.classList.add('visible');
+            }, 300); // 🎯 Delay after heading
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+  
+    sections.forEach(section => observer.observe(section));
+  
+    const footerObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          footer.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+  
+    footerObserver.observe(footer);
+  } else {
+    // Fallback
+    sections.forEach(section => {
+      const heading = section.querySelector('.fade-in-heading');
+      const paragraph = section.querySelector('.fade-in-paragraph');
+      if (heading) heading.classList.add('visible');
+      if (paragraph) paragraph.classList.add('visible');
     });
-  }, { threshold: 0.15 });
-
-  sections.forEach(section => observer.observe(section));
-
+    footer.classList.add('visible');
+  }
+  
   /********************************************************************
-   * Shimmering Grid Background
+   * Shimmering Grid Background with Smooth Scroll Drift
    ********************************************************************/
   const canvas = document.getElementById('grid-canvas');
   const ctx = canvas.getContext('2d');
   let offset = 0;
-  let drift = 0;
-
+  let targetDrift = 0;
+  let currentDrift = 0;
+  
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
     ctx.lineWidth = 1;
+  
     const spacing = 40;
-    offset += 0.03;
-    drift += (window.scrollY * 0.1 - drift) * 0.05;
+    const moveSpeed = 0.03;
+    offset += moveSpeed;
+  
+    targetDrift = window.scrollY * 0.1;
+    currentDrift += (targetDrift - currentDrift) * 0.05;
+  
     for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
     }
-    for (let y = -spacing + ((offset + drift) % spacing); y < canvas.height; y += spacing) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  
+    for (let y = -spacing + ((offset + currentDrift) % spacing); y < canvas.height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
     }
-    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
-    g.addColorStop(0, "rgba(16,31,36,0)");
-    g.addColorStop(1, "rgba(16,31,36,1)");
-    ctx.fillStyle = g;
+  
+    const gradient = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, 0,
+      canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.4
+    );
+    gradient.addColorStop(0, "rgba(16,31,36,0)");
+    gradient.addColorStop(1, "rgba(16,31,36,1)");
+  
+    ctx.fillStyle = gradient;
     ctx.globalCompositeOperation = 'destination-in';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalCompositeOperation = 'source-over';
   }
-
+  
   function animate() {
     drawGrid();
     requestAnimationFrame(animate);
   }
-
-  window.addEventListener('resize', () => {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-  });
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+  
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
   animate();
-
+  
   /********************************************************************
    * Panel Cascade Fade+Scale on Load
    ********************************************************************/
   window.addEventListener('load', () => {
-    panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
+    panels.forEach((panel, index) => {
+      setTimeout(() => {
+        panel.classList.add('visible');
+      }, index * 150);
+    });
   });
 </script>
-
 
 </body>
 </html>
