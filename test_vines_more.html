@@ -231,50 +231,41 @@
     }
 
     /* ───── VINE ───── */
-    .vine-wrapper {
-      margin-top: 40px;
-      margin-bottom: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .vine-wrapper img {
-      max-height: 1400px;
-      width: auto;
-      max-width: 100%;
-      filter: drop-shadow(2px 2px 0 rgba(16, 31, 36, 0.3));
-      pointer-events: none;
-      user-select: none;
-    }
-
     .with-vines {
       position: relative;
-      min-height: 700px; /* or whatever fits */
-      padding: 40px 20px;
+      min-height: 900px; /* or whatever fits your vines */
+      padding: 60px 20px;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       align-items: center;
       text-align: center;
-      overflow: hidden; /* important */
+      overflow: hidden;
     }
     
     .vine-overlay {
       position: absolute;
-      top: -80px;   /* offset upwards if you want */
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
       width: 600px;
       max-width: 90%;
+      opacity: 0.8;
+      z-index: 0;
       pointer-events: none;
-      z-index: 0; /* behind text */
-      opacity: 0.8; /* slight transparency if needed */
     }
     
     .vine-overlay img {
       width: 100%;
       height: auto;
       filter: drop-shadow(2px 2px 0 rgba(16, 31, 36, 0.2));
+    }
+    
+    /* Boost text above the vines */
+    .with-vines h2,
+    .with-vines p {
+      position: relative;
+      z-index: 1;
     }
 
     /* ───── FOOTER ───── */
@@ -329,12 +320,12 @@
   </div>
   -->
   <div class="scroll-section with-vines">
-    <h2 class="fade-in-heading">The Future of Storytelling</h2>
-    <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
-
     <div class="vine-overlay">
       <img src="images/vines.png" alt="Vines" />
     </div>
+    
+    <h2 class="fade-in-heading">The Future of Storytelling</h2>
+    <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
   </div>
   
 
