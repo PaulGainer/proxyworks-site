@@ -435,16 +435,38 @@
     });
   }
   
+  // function animateVines() {
+  //   vines.forEach(vine => {
+  //     const data = vineData.get(vine);
+  //     // Smooth interpolation: move current toward target
+  //     data.current += (data.target - data.current) * 0.08; // smoothness factor (lower = more lag)
+  
+  //     const reveal = Math.max(0, 100 - data.current * 100);
+  //     vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+  //   });
+  // }
   function animateVines() {
     vines.forEach(vine => {
       const data = vineData.get(vine);
-      // Smooth interpolation: move current toward target
-      data.current += (data.target - data.current) * 0.08; // smoothness factor (lower = more lag)
+      data.current += (data.target - data.current) * 0.08;
   
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+  
+      // 🌟 New: Fade based on vertical position
+      const rect = vine.closest('.scroll-section').getBoundingClientRect();
+      const screenCenter = window.innerHeight / 2;
+      const sectionCenter = rect.top + rect.height / 2;
+      const distanceFromCenter = Math.abs(sectionCenter - screenCenter);
+  
+      const maxDistance = window.innerHeight / 2;
+      let fade = 1 - (distanceFromCenter / maxDistance);
+      fade = Math.max(0, Math.min(1, fade)); // clamp 0-1
+  
+      vine.style.opacity = fade * 0.9; // 90% max opacity (soft aesthetic cap)
     });
   }
+
   
   /********************************************************************
    * Cinematic Section Text Fade
