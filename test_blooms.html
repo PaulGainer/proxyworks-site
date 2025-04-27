@@ -454,27 +454,30 @@
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
   
       const rect = vine.getBoundingClientRect();
-      const heroHeight = window.innerWidth < 768 ? 240 : 320; // mobile vs desktop hero height
-      const fadeZone = window.innerHeight * 0.1; // 10% of screen height
+      const heroHeight = window.innerWidth < 768 ? 240 : 320; // Mobile/Desktop hero
+      const fadeZone = window.innerHeight * 0.1; // 10% of viewport
   
-      let opacity = 1;
+      let opacity = 0.9; // Default dreamy opacity (max)
   
-      // Fade near bottom of viewport
-      if (rect.bottom > window.innerHeight - fadeZone) {
-        const distanceFromBottom = rect.bottom - (window.innerHeight - fadeZone);
-        opacity = Math.min(opacity, 1 - distanceFromBottom / fadeZone);
+      // Only if vine is in viewport area do we modify
+      if (rect.bottom > 0 && rect.top < window.innerHeight) {
+  
+        // Fade near bottom
+        if (rect.bottom > window.innerHeight - fadeZone) {
+          const distanceFromBottom = rect.bottom - (window.innerHeight - fadeZone);
+          opacity = Math.min(opacity, 0.9 * (1 - distanceFromBottom / fadeZone));
+        }
+  
+        // Fade near hero section
+        if (rect.top < heroHeight + fadeZone) {
+          const distanceFromHeroBottom = (heroHeight + fadeZone) - rect.top;
+          opacity = Math.min(opacity, 0.9 * (1 - distanceFromHeroBottom / fadeZone));
+        }
+      } else {
+        opacity = 0; // Totally hidden outside viewport
       }
   
-      // Fade near hero bottom (top of content area)
-      if (rect.top < heroHeight + fadeZone) {
-        const distanceFromHeroBottom = (heroHeight + fadeZone) - rect.top;
-        opacity = Math.min(opacity, 1 - distanceFromHeroBottom / fadeZone);
-      }
-  
-      // Clamp between 0 and 1
-      opacity = Math.max(0, Math.min(1, opacity));
-  
-      vine.style.opacity = opacity * 0.9; // dreamy 90% max cap
+      vine.style.opacity = Math.max(0, Math.min(0.9, opacity));
     });
   }
 
