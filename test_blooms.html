@@ -453,19 +453,30 @@
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
   
-      // 🌟 New: Fade based on vertical position
-      const rect = vine.closest('.scroll-section').getBoundingClientRect();
-      const screenCenter = window.innerHeight / 2;
-      const sectionCenter = rect.top + rect.height / 2;
-      const distanceFromCenter = Math.abs(sectionCenter - screenCenter);
+      // 🌿 NEW: Proper fade logic
+      const rect = vine.getBoundingClientRect();
+      const heroHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-height-desktop')) || 320;
+      const fadeZone = window.innerHeight * 0.1; // 10% fade zone
   
-      const maxDistance = window.innerHeight / 2;
-      let fade = 1 - (distanceFromCenter / maxDistance);
-      fade = Math.max(0, Math.min(1, fade)); // clamp 0-1
+      let opacity = 1;
   
-      vine.style.opacity = fade * 0.9; // 90% max opacity (soft aesthetic cap)
+      // Bottom fade
+      if (rect.bottom > window.innerHeight - fadeZone) {
+        const excess = rect.bottom - (window.innerHeight - fadeZone);
+        opacity = Math.max(0, 1 - (excess / fadeZone));
+      }
+  
+      // Top fade (relative to hero bottom)
+      if (rect.top < heroHeight + fadeZone) {
+        const excess = (heroHeight + fadeZone) - rect.top;
+        opacity = Math.max(0, Math.min(opacity, 1 - (excess / fadeZone)));
+      }
+  
+      opacity = Math.max(0, Math.min(1, opacity));
+      vine.style.opacity = opacity * 0.9; // Slight cap for dreaminess
     });
   }
+
 
   
   /********************************************************************
