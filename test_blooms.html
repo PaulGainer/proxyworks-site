@@ -457,18 +457,6 @@
   
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
-  
-      // 🌿 NEW: Fade vine based on vertical distance from viewport center
-      const rect = vine.getBoundingClientRect();
-      const vineCenterY = rect.top + rect.height / 2;
-      const viewportCenterY = window.innerHeight / 2;
-      const distanceFromCenter = Math.abs(vineCenterY - viewportCenterY);
-  
-      const maxDistance = window.innerHeight / 2;
-      let opacity = 1 - (distanceFromCenter / maxDistance); // 1 at center, 0 at edges
-      opacity = Math.max(0, Math.min(1, opacity)); // clamp
-  
-      vine.style.opacity = opacity * 0.8; // (🌿 *0.8 to keep max opacity matching design)
     });
   }
 
