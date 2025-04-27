@@ -248,6 +248,35 @@
       user-select: none;
     }
 
+    .with-vines {
+      position: relative;
+      min-height: 700px; /* or whatever fits */
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      overflow: hidden; /* important */
+    }
+    
+    .vine-overlay {
+      position: absolute;
+      top: -80px;   /* offset upwards if you want */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      max-width: 90%;
+      pointer-events: none;
+      z-index: 0; /* behind text */
+      opacity: 0.8; /* slight transparency if needed */
+    }
+    
+    .vine-overlay img {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(2px 2px 0 rgba(16, 31, 36, 0.2));
+    }
+
     /* ───── FOOTER ───── */
     footer {
       text-align: center;
