@@ -438,35 +438,11 @@
   function animateVines() {
     vines.forEach(vine => {
       const data = vineData.get(vine);
-      data.current += (data.target - data.current) * 0.08;
+      // Smooth interpolation: move current toward target
+      data.current += (data.target - data.current) * 0.08; // smoothness factor (lower = more lag)
   
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
-  
-      const section = vine.closest('.scroll-section');
-      const rect = section.getBoundingClientRect();
-  
-      const heroHeight = window.innerWidth < 768 ? 240 : 320;
-      const fadeZone = window.innerHeight * 0.1; // 10% of viewport
-  
-      let opacity = 0.9;
-  
-      if (rect.bottom < heroHeight) {
-        opacity = 0;
-      } else if (rect.top > window.innerHeight) {
-        opacity = 0;
-      } else {
-        if (rect.top < heroHeight + fadeZone) {
-          const distance = (heroHeight + fadeZone) - rect.top;
-          opacity = Math.max(0, 0.9 * (1 - distance / fadeZone));
-        }
-        if (rect.bottom > window.innerHeight - fadeZone) {
-          const distance = rect.bottom - (window.innerHeight - fadeZone);
-          opacity = Math.max(0, 0.9 * (1 - distance / fadeZone));
-        }
-      }
-  
-      vine.style.opacity = opacity;
     });
   }
 
