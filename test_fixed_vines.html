@@ -27,43 +27,9 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont,
                    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
                    "Open Sans", "Helvetica Neue", sans-serif;
-      position: relative;
-      overflow-x: hidden;
     }
 
-    /* 🌿 Vine Layer */
-    .vine-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      pointer-events: none;
-      z-index: 1; /* Behind content */
-    }
-
-    .vine-layer .vine {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 1000px;
-      max-width: 100%;
-      opacity: 0.8;
-      filter: saturate(1.5);
-    }
-
-    /* 🌿 Fade Mask for Vines Only */
-    .vine-fade-mask {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      pointer-events: none;
-      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
-      z-index: 2; /* Above vines, below content */
-    }
-
-    /* ✨ HERO */
+    /* ───── HERO ───── */
     .hero {
       position: fixed;
       top: 0;
@@ -188,13 +154,11 @@
       opacity: 0;
     }
 
-    /* ✨ CONTENT */
+    /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
       color: var(--brand-bg);
       padding-top: var(--hero-height-desktop);
-      position: relative;
-      z-index: 5; /* Above vines and mask */
     }
 
     @media (max-width: 768px) {
@@ -202,14 +166,14 @@
         padding-top: var(--hero-height-mobile);
       }
     }
-
+        
     .scroll-section {
       min-height: 1300px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      padding: 120px 20px 20px 20px;
+      padding: 120px 20px 20px 20px; /* big top padding to simulate centering */
       text-align: center;
       position: relative;
     }
@@ -255,7 +219,46 @@
       opacity: 0.85;
     }
 
-    /* ✨ FOOTER */
+    /* ───── VINE LAYER ───── */
+    .vine-layer {
+      position: fixed;
+      top: var(--hero-height-desktop);
+      left: 0;
+      width: 100%;
+      height: calc(100% - var(--hero-height-desktop));
+      pointer-events: none; /* vines are purely visual */
+      z-index: 5; /* below carousel (z-index:100), above grid (z-index:1) */
+    }
+    
+    @media (max-width: 768px) {
+      .vine-layer {
+        top: var(--hero-height-mobile);
+        height: calc(100% - var(--hero-height-mobile));
+      }
+    }
+    
+    .vine {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      max-width: 100%;
+      opacity: 0.8;
+    }
+    
+    .vine img {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(4px 4px 0 rgb(207, 210, 211));
+    }
+
+
+    .mirror-horiztonal {
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+    }
+    
+    /* ───── FOOTER ───── */
     footer {
       text-align: center;
       padding: 20px;
@@ -267,6 +270,19 @@
       transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
+        /* ───── FADE BOTTOM (only vines) ───── */
+    .fade-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px; /* Adjust fade zone height */
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
+      z-index: 6; /* just above .vine-layer, below hero/grid */
+    }
+
+    
     footer.visible {
       opacity: 1;
       transform: translateY(0);
@@ -276,12 +292,12 @@
 
 <body>
 
-<!-- 🌿 Vine Layer -->
-<div class="vine-layer" id="vine-layer"></div>
-
-<!-- 🌿 Vine Fade Mask -->
-<div class="vine-fade-mask"></div>
-
+<div class="vine-layer">
+  <div class="vine" style="top: 1400px;"><img src="vines.svg"></div>
+  <div class="vine" style="top: 2700px;"><img class="mirror-horiztonal" src="vines.svg"></div>
+  <div class="vine" style="top: 4000px;"><img src="vines.svg"></div>
+</div>
+  
 <!-- ✨ HERO Section -->
 <section class="hero">
   <canvas id="grid-canvas"></canvas>
@@ -296,7 +312,7 @@
   </div>
 </section>
 
-<!-- ✨ CONTENT -->
+<!-- ✨ CONTENT Section -->
 <section class="content">
   <div class="scroll-section hero-section">
     <div class="scroll-arrow" id="scroll-arrow">
@@ -310,7 +326,7 @@
       ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.
     </p>
   </div>
-
+  
   <div class="scroll-section">
     <h2 class="fade-in-heading">The Future of Storytelling</h2>
     <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
@@ -334,6 +350,8 @@
   ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
 </footer>
 
+<div class="fade-bottom"></div>
+
 <!-- ✨ SCRIPTS -->
 <script>
   /********************************************************************
@@ -345,7 +363,7 @@
   });
   
   /********************************************************************
-   * Carousel + Fade + Dynamic Section Mapping
+   * Carousel + Dynamic Section Mapping
    ********************************************************************/
   const ring = document.getElementById('ring');
   const panels = [...ring.children];
@@ -359,7 +377,7 @@
   
   panels.forEach((p, i) => p.dataset.base = slice * i);
   
-  function renderCarousel() {
+  function render() {
     ring.style.transform = `rotateY(${yaw}deg)`;
     panels.forEach(p => {
       const base = +p.dataset.base;
@@ -380,8 +398,9 @@
       .forEach(o => ring.appendChild(o.panel));
   }
   
-  function updateCarouselOnScroll() {
+  function onScroll() {
     const centerY = window.scrollY + window.innerHeight / 2;
+  
     let closestIndex = 0;
     let closestDistance = Infinity;
   
@@ -398,32 +417,52 @@
     if (closestIndex !== currentIndex) {
       currentIndex = closestIndex;
       yaw = -slice * currentIndex;
-      renderCarousel();
+      render();
     }
   }
   
   /********************************************************************
-   * Vine Creation and Layer Management
+   * Vine Grow Reveal with Section-Fade
    ********************************************************************/
-  const vineLayer = document.getElementById('vine-layer');
+  const vines = document.querySelectorAll('.vine-overlay');
+  const vineData = new Map();
   
-  sections.forEach((section, index) => {
-    if (index === 0) return; // skip the first empty hero section
-    const vine = document.createElement('div');
-    vine.classList.add('vine');
-  
-    const img = document.createElement('img');
-    img.src = 'images/vines.svg'; // your vine artwork
-    img.alt = 'Vines';
-    
-    vine.appendChild(img);
-  
-    vine.style.top = section.offsetTop + 'px';
-    vineLayer.appendChild(vine);
+  vines.forEach(vine => {
+    vineData.set(vine, { current: 0, target: 0 });
   });
   
+  function updateVineTargets() {
+    vines.forEach(vine => {
+      const section = vine.closest('.scroll-section');
+      if (!section) return;
+  
+      const rect = section.getBoundingClientRect();
+      const sectionHeight = rect.height;
+      const visibleTop = Math.max(0, window.innerHeight - rect.top);
+      const visibleHeight = Math.min(visibleTop, sectionHeight);
+  
+      let ratio = visibleHeight / sectionHeight;
+      ratio = Math.max(0, Math.min(1, ratio));
+  
+      vineData.get(vine).target = ratio;
+    });
+  }
+  
+  function animateVines() {
+    vines.forEach(vine => {
+      const data = vineData.get(vine);
+      // Smooth interpolation: move current toward target
+      data.current += (data.target - data.current) * 0.08;
+  
+      const reveal = Math.max(0, 100 - data.current * 100);
+      vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+    });
+  }
+
+
+  
   /********************************************************************
-   * Cinematic Section Text Fade
+   * Cinematic Text Fade
    ********************************************************************/
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
@@ -478,10 +517,7 @@
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
     }
   
-    const g = ctx.createRadialGradient(
-      canvas.width/2, canvas.height/2, 0,
-      canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4
-    );
+    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
     g.addColorStop(0, "rgba(16,31,36,0)");
     g.addColorStop(1, "rgba(16,31,36,1)");
     ctx.fillStyle = g;
@@ -490,29 +526,37 @@
     ctx.globalCompositeOperation = 'source-over';
   }
   
-  function animateGrid() {
+  function animate() {
     drawGrid();
-    requestAnimationFrame(animateGrid);
+    animateVines();
+    requestAnimationFrame(animate);
   }
   
+  
+  /********************************************************************
+   * Initial Setup
+   ********************************************************************/
   function resizeCanvas() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
   }
   
-  /********************************************************************
-   * Event Listeners and Initialization
-   ********************************************************************/
   window.addEventListener('resize', resizeCanvas);
-  window.addEventListener('scroll', updateCarouselOnScroll, { passive: true });
+  window.addEventListener('scroll', () => {
+    onScroll();
+    updateVineTargets();
+    animateVines();
+  }, { passive: true });
   
   window.addEventListener('load', () => {
     panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
-    updateCarouselOnScroll();
+    onScroll();
+    updateVineTargets();
     resizeCanvas();
-    animateGrid();
+    animate();
   });
 </script>
+
 
 
 </body>
