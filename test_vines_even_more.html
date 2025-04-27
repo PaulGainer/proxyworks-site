@@ -320,12 +320,18 @@
 
 <!-- ✨ SCRIPTS -->
 <script>
+  /********************************************************************
+   * Scroll Arrow Fade Out
+   ********************************************************************/
   const scrollArrow = document.getElementById('scroll-arrow');
   window.addEventListener('scroll', () => {
     scrollArrow.classList.toggle('hidden', window.scrollY > 10);
   });
 
-  const SCROLL_THRESHOLD = 1200;
+  /********************************************************************
+   * Carousel + Cascade Fade-In + Scale
+   ********************************************************************/
+  const SCROLL_THRESHOLD = 950; // 🔥 lower now
   const PANEL_COUNT = 4;
   const RADIUS = 350;
   const ring = document.getElementById('ring');
@@ -352,9 +358,10 @@
   }
 
   function onScroll() {
-    let y = window.scrollY - window.innerHeight; // adjust offset
-    let idx = Math.max(0, Math.floor(Math.max(0, y) / SCROLL_THRESHOLD));
-    idx = Math.min(PANEL_COUNT - 1, idx);
+    // ✨ Offset scroll so the transition happens sooner
+    let adjustedY = window.scrollY - 300; // <--- Correction to account for top padding
+    let idx = Math.floor(Math.max(0, adjustedY) / SCROLL_THRESHOLD);
+    idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
     if (idx !== currentIndex) {
       currentIndex = idx;
       yaw = -slice * idx;
@@ -365,7 +372,12 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /********************************************************************
+   * Cinematic Section Text Fade
+   ********************************************************************/
+  const footer = document.querySelector('footer');
   const sections = document.querySelectorAll('.scroll-section');
+
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -375,14 +387,18 @@
         if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
       }
     });
-  }, { threshold: 0.15 }); // 🔥 updated to trigger earlier
+  }, { threshold: 0.15 });
 
   sections.forEach(section => observer.observe(section));
 
+  /********************************************************************
+   * Shimmering Grid Background
+   ********************************************************************/
   const canvas = document.getElementById('grid-canvas');
   const ctx = canvas.getContext('2d');
   let offset = 0;
   let drift = 0;
+
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "rgba(255,255,255,0.05)";
@@ -418,10 +434,14 @@
   canvas.height = canvas.clientHeight;
   animate();
 
+  /********************************************************************
+   * Panel Cascade Fade+Scale on Load
+   ********************************************************************/
   window.addEventListener('load', () => {
     panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
   });
 </script>
+
 
 </body>
 </html>
