@@ -443,22 +443,6 @@
   
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
-  
-      // 🌿 NEW: Live fade based on distance to viewport bottom
-      const rect = vine.getBoundingClientRect();
-      const vineBottom = rect.bottom;
-      const viewportHeight = window.innerHeight;
-  
-      // Only start fading when vine is within 150px of bottom
-      const fadeZoneHeight = 150; // 🔥 adjust if needed
-      const distanceFromBottom = viewportHeight - vineBottom;
-  
-      let opacity = 1;
-      if (distanceFromBottom < fadeZoneHeight) {
-        opacity = Math.max(0, distanceFromBottom / fadeZoneHeight);
-      }
-  
-      vine.style.opacity = opacity * 0.8; // 🌿 Max opacity still 80%
     });
   }
 
