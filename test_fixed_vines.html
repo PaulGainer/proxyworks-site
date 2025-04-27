@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ProxyWorks – AI-powered storytelling systems for tabletop roleplaying games." />
+  <meta name="author" content="ProxyWorks Ltd" />
+  <title>ProxyWorks</title>
+
+  <style>
+    :root {
+      --brand-bg: #101f24;
+      --text-muted: #888888;
+      --hero-height-desktop: 320px;
+      --hero-height-mobile: 240px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      color: var(--brand-bg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                   "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
+    /* ───── HERO ───── */
+    .hero {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--hero-height-desktop);
+      z-index: 100;
+      background: var(--brand-bg);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        height: var(--hero-height-mobile);
+      }
+    }
+
+    #grid-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      transform: translateZ(0);
+    }
+
+    .scene {
+      perspective: 1300px;
+      z-index: 2;
+    }
+
+    .ring {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      transform-style: preserve-3d;
+      transform-origin: center;
+      transition: transform 0.4s ease;
+    }
+
+    @media (max-width: 768px) {
+      .ring {
+        width: 240px;
+        height: 240px;
+      }
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      background: var(--brand-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .panel.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .image-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .image-container img {
+      max-height: 70%;
+      max-width: 70%;
+      object-fit: contain;
+      backface-visibility: hidden;
+      pointer-events: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .breathing img {
+      animation: breathe 8s ease-in-out infinite;
+    }
+
+    /* ✨ Scroll Arrow */
+    .scroll-arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      animation: arrow-bob 2s infinite ease-in-out;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .scroll-arrow svg {
+      width: 20px;
+      height: 20px;
+      fill: rgba(16, 31, 36, 0.8);
+      filter: drop-shadow(0 0 8px rgba(100, 200, 255, 0.4));
+    }
+
+    @keyframes arrow-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    .scroll-arrow.hidden {
+      opacity: 0;
+    }
+
+    /* ───── CONTENT ───── */
+    .content {
+      background: #ffffff;
+      color: var(--brand-bg);
+      padding-top: var(--hero-height-desktop);
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding-top: var(--hero-height-mobile);
+      }
+    }
+        
+    .scroll-section {
+      min-height: 1300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 120px 20px 20px 20px; /* big top padding to simulate centering */
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-section {
+      height: calc(100vh - var(--hero-height-desktop));
+      min-height: 680px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section {
+        height: calc(100vh - var(--hero-height-mobile));
+        min-height: 480px;
+      }
+    }
+
+    .fade-in-heading, .fade-in-paragraph {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in-heading.visible,
+    .fade-in-paragraph.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .scroll-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .scroll-section p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      opacity: 0.85;
+    }
+
+    /* ───── VINES ───── */
+    .with-vines {
+      position: relative;
+    }
+
+    .vine-overlay {
+      position: absolute;
+      top: 190px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      max-width: 100%;
+      opacity: 0.8;
+      pointer-events: none;
+      z-index: 0;
+      filter: saturate(1.5);
+    }
+
+    
+    .vine-overlay img {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(4px 4px 0 rgb(207, 210, 211));
+    }
+
+
+    .with-vines h2,
+    .with-vines p {
+      position: relative;
+      z-index: 1;
+    }
+
+    .mirror-horiztonal {
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+    }
+    
+    /* ───── FOOTER ───── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    footer.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  
+<!-- ✨ HERO Section -->
+<section class="hero">
+  <canvas id="grid-canvas"></canvas>
+  <div class="scene" id="scene">
+    <div class="ring" id="ring">
+      <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/architect.png" alt="Creation" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/narration.png" alt="Vision" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="Gamesmaster" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Journey" /></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ✨ CONTENT Section -->
+<section class="content">
+  <div class="scroll-section hero-section">
+    <div class="scroll-arrow" id="scroll-arrow">
+      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"></path></svg>
+    </div>
+  </div>
+
+  <div class="scroll-section">
+    <div class="vine-overlay">
+      <img src="images/vines.svg" alt="Vines"/>
+    </div>
+    <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
+    <p class="fade-in-paragraph">
+      ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.
+    </p>
+  </div>
+  
+  <div class="scroll-section with-vines">
+    <div class="vine-overlay">
+      <img class="mirror-horiztonal" src="images/vines.svg" alt="Vines" />
+    </div>
+    <h2 class="fade-in-heading">The Future of Storytelling</h2>
+    <p class="fade-in-paragraph">Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.</p>
+  </div>
+
+  <div class="scroll-section">
+    <div class="vine-overlay">
+      <img src="images/vines.svg" alt="Vines"/>
+    </div>
+    <h2 class="fade-in-heading">Your Invisible Gamesmaster</h2>
+    <p class="fade-in-paragraph">ProxyWorks dynamically crafts worlds, characters, and plots — weaving new stories from your every move.</p>
+  </div>
+
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">Join the Journey</h2>
+    <p class="fade-in-paragraph">Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.</p>
+  </div>
+
+  <div style="height: 300px;"></div>
+</section>
+
+<!-- ✨ FOOTER -->
+<footer>
+  ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
+</footer>
+
+<!-- ✨ SCRIPTS -->
+<script>
+  /********************************************************************
+   * Scroll Arrow Fade Out
+   ********************************************************************/
+  const scrollArrow = document.getElementById('scroll-arrow');
+  window.addEventListener('scroll', () => {
+    scrollArrow.classList.toggle('hidden', window.scrollY > 10);
+  });
+  
+  /********************************************************************
+   * Carousel + Dynamic Section Mapping
+   ********************************************************************/
+  const ring = document.getElementById('ring');
+  const panels = [...ring.children];
+  const PANEL_COUNT = panels.length;
+  const slice = 360 / PANEL_COUNT;
+  const RADIUS = 420;
+  let yaw = 0;
+  let currentIndex = -1;
+  const sections = document.querySelectorAll('.scroll-section');
+  const footer = document.querySelector('footer');
+  
+  panels.forEach((p, i) => p.dataset.base = slice * i);
+  
+  function render() {
+    ring.style.transform = `rotateY(${yaw}deg)`;
+    panels.forEach(p => {
+      const base = +p.dataset.base;
+      const rel = (base + yaw) % 360;
+      const rad = rel * Math.PI / 180;
+      const vis = Math.max(0, Math.cos(rad)) ** 2;
+      const scl = 0.3 + (0.85 - 0.3) * vis;
+      p.style.opacity = vis;
+      p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+      p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
+    });
+    panels
+      .map(p => ({
+        panel: p,
+        depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+      }))
+      .sort((a, b) => a.depth - b.depth)
+      .forEach(o => ring.appendChild(o.panel));
+  }
+  
+  function onScroll() {
+    const centerY = window.scrollY + window.innerHeight / 2;
+  
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+  
+    sections.forEach((section, idx) => {
+      const rect = section.getBoundingClientRect();
+      const sectionCenter = window.scrollY + rect.top + rect.height / 2;
+      const distance = Math.abs(centerY - sectionCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = idx;
+      }
+    });
+  
+    if (closestIndex !== currentIndex) {
+      currentIndex = closestIndex;
+      yaw = -slice * currentIndex;
+      render();
+    }
+  }
+  
+  /********************************************************************
+   * Vine Grow Reveal with Section-Fade
+   ********************************************************************/
+  const vines = document.querySelectorAll('.vine-overlay');
+  const vineData = new Map();
+  
+  vines.forEach(vine => {
+    vineData.set(vine, { current: 0, target: 0 });
+  });
+  
+  function updateVineTargets() {
+    vines.forEach(vine => {
+      const section = vine.closest('.scroll-section');
+      if (!section) return;
+  
+      const rect = section.getBoundingClientRect();
+      const sectionHeight = rect.height;
+      const visibleTop = Math.max(0, window.innerHeight - rect.top);
+      const visibleHeight = Math.min(visibleTop, sectionHeight);
+  
+      let ratio = visibleHeight / sectionHeight;
+      ratio = Math.max(0, Math.min(1, ratio));
+  
+      vineData.get(vine).target = ratio;
+    });
+  }
+  
+  function animateVines() {
+    vines.forEach(vine => {
+      const data = vineData.get(vine);
+      // Smooth interpolation: move current toward target
+      data.current += (data.target - data.current) * 0.08;
+  
+      const reveal = Math.max(0, 100 - data.current * 100);
+      vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+    });
+  }
+
+
+  
+  /********************************************************************
+   * Cinematic Text Fade
+   ********************************************************************/
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const heading = entry.target.querySelector('.fade-in-heading');
+          const paragraph = entry.target.querySelector('.fade-in-paragraph');
+          if (heading) heading.classList.add('visible');
+          if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
+        }
+      });
+    }, { threshold: 0.2 });
+  
+    sections.forEach(section => observer.observe(section));
+  
+    const footerObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          footer.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    footerObserver.observe(footer);
+  } else {
+    sections.forEach(section => {
+      section.querySelector('.fade-in-heading')?.classList.add('visible');
+      section.querySelector('.fade-in-paragraph')?.classList.add('visible');
+    });
+    footer.classList.add('visible');
+  }
+  
+  /********************************************************************
+   * Shimmering Grid Background
+   ********************************************************************/
+  const canvas = document.getElementById('grid-canvas');
+  const ctx = canvas.getContext('2d');
+  let offset = 0;
+  let drift = 0;
+  
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    const spacing = 40;
+    offset += 0.03;
+    drift += (window.scrollY * 0.1 - drift) * 0.05;
+  
+    for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = -spacing + ((offset + drift) % spacing); y < canvas.height; y += spacing) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+  
+    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
+    g.addColorStop(0, "rgba(16,31,36,0)");
+    g.addColorStop(1, "rgba(16,31,36,1)");
+    ctx.fillStyle = g;
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  
+  function animate() {
+    drawGrid();
+    animateVines();
+    requestAnimationFrame(animate);
+  }
+  
+  
+  /********************************************************************
+   * Initial Setup
+   ********************************************************************/
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('scroll', () => {
+    onScroll();
+    updateVineTargets();
+    animateVines();
+  }, { passive: true });
+  
+  window.addEventListener('load', () => {
+    panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
+    onScroll();
+    updateVineTargets();
+    resizeCanvas();
+    animate();
+  });
+</script>
+
+
+
+</body>
+</html>
