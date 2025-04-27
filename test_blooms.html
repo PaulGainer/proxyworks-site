@@ -341,175 +341,184 @@
 
 <!-- ✨ SCRIPTS -->
 <script>
-  /********************************************************************
-   * Scroll Arrow Fade Out
-   ********************************************************************/
-  const scrollArrow = document.getElementById('scroll-arrow');
-  window.addEventListener('scroll', () => {
-    scrollArrow.classList.toggle('hidden', window.scrollY > 10);
+/********************************************************************
+ * Scroll Arrow Fade Out
+ ********************************************************************/
+const scrollArrow = document.getElementById('scroll-arrow');
+window.addEventListener('scroll', () => {
+  scrollArrow.classList.toggle('hidden', window.scrollY > 10);
+});
+
+/********************************************************************
+ * Carousel + Fade + Dynamic Section Mapping
+ ********************************************************************/
+const ring = document.getElementById('ring');
+const panels = [...ring.children];
+const PANEL_COUNT = panels.length;
+const slice = 360 / PANEL_COUNT;
+const RADIUS = 420; // 🔥 increased from 350 to 420
+let yaw = 0;
+let currentIndex = -1;
+const sections = document.querySelectorAll('.scroll-section');
+const footer = document.querySelector('footer');
+
+panels.forEach((p, i) => p.dataset.base = slice * i);
+
+function render() {
+  ring.style.transform = `rotateY(${yaw}deg)`;
+  panels.forEach(p => {
+    const base = +p.dataset.base;
+    const rel = (base + yaw) % 360;
+    const rad = rel * Math.PI / 180;
+    const vis = Math.max(0, Math.cos(rad)) ** 2;
+    const scl = 0.3 + (0.85 - 0.3) * vis;
+    p.style.opacity = vis;
+    p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
+    p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
+  });
+  panels
+    .map(p => ({
+      panel: p,
+      depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
+    }))
+    .sort((a, b) => a.depth - b.depth)
+    .forEach(o => ring.appendChild(o.panel));
+}
+
+function onScroll() {
+  const centerY = window.scrollY + window.innerHeight / 2;
+
+  let closestIndex = 0;
+  let closestDistance = Infinity;
+
+  sections.forEach((section, idx) => {
+    const rect = section.getBoundingClientRect();
+    const sectionCenter = window.scrollY + rect.top + rect.height / 2;
+    const distance = Math.abs(centerY - sectionCenter);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = idx;
+    }
   });
 
-  /********************************************************************
-   * Carousel + Fade + Dynamic Section Mapping
-   ********************************************************************/
-  const ring = document.getElementById('ring');
-  const panels = [...ring.children];
-  const PANEL_COUNT = panels.length;
-  const slice = 360 / PANEL_COUNT;
-  const RADIUS = 420; // 🔥 increased from 350 to 420 to fix the peeking
-  let yaw = 0;
-  let currentIndex = -1;
-  const sections = document.querySelectorAll('.scroll-section');
-  const footer = document.querySelector('footer');
-  
-  panels.forEach((p, i) => p.dataset.base = slice * i);
-
-  function render() {
-    ring.style.transform = `rotateY(${yaw}deg)`;
-    panels.forEach(p => {
-      const base = +p.dataset.base;
-      const rel = (base + yaw) % 360;
-      const rad = rel * Math.PI / 180;
-      const vis = Math.max(0, Math.cos(rad)) ** 2;
-      const scl = 0.3 + (0.85 - 0.3) * vis;
-      p.style.opacity = vis;
-      p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
-      p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
-    });
-    panels
-      .map(p => ({
-        panel: p,
-        depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180)
-      }))
-      .sort((a, b) => a.depth - b.depth)
-      .forEach(o => ring.appendChild(o.panel));
+  if (closestIndex !== currentIndex) {
+    currentIndex = closestIndex;
+    yaw = -slice * currentIndex;
+    render();
   }
+}
 
-  function onScroll() {
-    const centerY = window.scrollY + window.innerHeight / 2;
+/********************************************************************
+ * Vine Grow Reveal - Corrected Per Section
+ ********************************************************************/
+const vines = document.querySelectorAll('.vine-overlay');
 
-    let closestIndex = 0;
-    let closestDistance = Infinity;
+function updateVines() {
+  vines.forEach(vine => {
+    const section = vine.closest('.scroll-section');
+    if (!section) return;
 
-    sections.forEach((section, idx) => {
-      const rect = section.getBoundingClientRect();
-      const sectionCenter = window.scrollY + rect.top + rect.height / 2;
-      const distance = Math.abs(centerY - sectionCenter);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIndex = idx;
+    const rect = section.getBoundingClientRect();
+    const sectionHeight = rect.height;
+    const visibleTop = Math.max(0, window.innerHeight - rect.top);
+    const visibleHeight = Math.min(visibleTop, sectionHeight);
+
+    let ratio = visibleHeight / sectionHeight;
+    ratio = Math.max(0, Math.min(1, ratio)); // clamp between 0–1
+
+    const reveal = Math.max(0, 100 - ratio * 100);
+    vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+  });
+}
+
+/********************************************************************
+ * Cinematic Section Text Fade
+ ********************************************************************/
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const heading = entry.target.querySelector('.fade-in-heading');
+        const paragraph = entry.target.querySelector('.fade-in-paragraph');
+        if (heading) heading.classList.add('visible');
+        if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
       }
     });
+  }, { threshold: 0.2 });
 
-    if (closestIndex !== currentIndex) {
-      currentIndex = closestIndex;
-      yaw = -slice * closestIndex;
-      render();
-    }
-  }
+  sections.forEach(section => observer.observe(section));
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('load', () => {
-    panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
-    onScroll(); // 🔥 trigger once on load
+  const footerObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        footer.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  footerObserver.observe(footer);
+} else {
+  sections.forEach(section => {
+    section.querySelector('.fade-in-heading')?.classList.add('visible');
+    section.querySelector('.fade-in-paragraph')?.classList.add('visible');
   });
+  footer.classList.add('visible');
+}
 
-  /********************************************************************
-   * Cinematic Section Text Fade
-   ********************************************************************/
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const heading = entry.target.querySelector('.fade-in-heading');
-          const paragraph = entry.target.querySelector('.fade-in-paragraph');
-          if (heading) heading.classList.add('visible');
-          if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
-        }
-      });
-    }, { threshold: 0.2 });
+/********************************************************************
+ * Shimmering Grid Background
+ ********************************************************************/
+const canvas = document.getElementById('grid-canvas');
+const ctx = canvas.getContext('2d');
+let offset = 0;
+let drift = 0;
 
-    sections.forEach(section => observer.observe(section));
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  ctx.lineWidth = 1;
+  const spacing = 40;
+  offset += 0.03;
+  drift += (window.scrollY * 0.1 - drift) * 0.05;
 
-    const footerObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          footer.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1 });
-    footerObserver.observe(footer);
-  } else {
-    sections.forEach(section => {
-      section.querySelector('.fade-in-heading')?.classList.add('visible');
-      section.querySelector('.fade-in-paragraph')?.classList.add('visible');
-    });
-    footer.classList.add('visible');
+  for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = -spacing + ((offset + drift) % spacing); y < canvas.height; y += spacing) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
   }
 
-  /********************************************************************
-   * Vine Grow Reveal on Scroll
-   ********************************************************************/
-  const vines = document.querySelectorAll('.vine-overlay');
-  
-  function updateVines() {
-    const scrollTop = window.scrollY;
-    const scrollHeight = document.body.scrollHeight - window.innerHeight;
-    const scrollRatio = scrollTop / scrollHeight;
-  
-    vines.forEach(vine => {
-      const reveal = Math.max(0, 100 - scrollRatio * 150); // tweak multiplier
-      vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
-    });
-  }
-  
-  window.addEventListener('scroll', updateVines, { passive: true });
-    
-  /********************************************************************
-   * Shimmering Grid Background
-   ********************************************************************/
-  const canvas = document.getElementById('grid-canvas');
-  const ctx = canvas.getContext('2d');
-  let offset = 0;
-  let drift = 0;
+  const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
+  g.addColorStop(0, "rgba(16,31,36,0)");
+  g.addColorStop(1, "rgba(16,31,36,1)");
+  ctx.fillStyle = g;
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'source-over';
+}
 
-  function drawGrid() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.lineWidth = 1;
-    const spacing = 40;
-    offset += 0.03;
-    drift += (window.scrollY * 0.1 - drift) * 0.05;
+function animate() {
+  drawGrid();
+  requestAnimationFrame(animate);
+}
 
-    for (let x = -spacing + (offset % spacing); x < canvas.width; x += spacing) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-    }
-    for (let y = -spacing + ((offset + drift) % spacing); y < canvas.height; y += spacing) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-    }
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
 
-    const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
-    g.addColorStop(0, "rgba(16,31,36,0)");
-    g.addColorStop(1, "rgba(16,31,36,1)");
-    ctx.fillStyle = g;
-    ctx.globalCompositeOperation = 'destination-in';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'source-over';
-  }
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('scroll', () => {
+  onScroll();
+  updateVines();
+}, { passive: true });
 
-  function animate() {
-    drawGrid();
-    requestAnimationFrame(animate);
-  }
-
-  function resizeCanvas() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-  }
-
-  window.addEventListener('resize', resizeCanvas);
+window.addEventListener('load', () => {
+  panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
+  onScroll();
+  updateVines();
   resizeCanvas();
   animate();
+});
 </script>
 
 </body>
