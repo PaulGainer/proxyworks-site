@@ -496,6 +496,7 @@ window.addEventListener('scroll', () => { onScroll(); animateVines(); }, { passi
 window.addEventListener('load', () => {
   panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
   onScroll();
+  animateVines();
   resizeCanvas();
   animate();
 });
