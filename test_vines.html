@@ -145,8 +145,6 @@
       max-width: 100%;
       opacity: 0;
       transition: opacity 0.6s ease;
-      display: flex;
-      justify-content: center;
     }
 
     .vine img {
@@ -157,20 +155,6 @@
 
     .mirror-horizontal {
       transform: scaleX(-1);
-    }
-
-    @keyframes gentle-sway {
-      0%, 100% {
-        transform: translateX(0);
-      }
-      50% {
-        transform: translateX(2px); /* or 1px if you want it even subtler */
-      }
-    }
-    
-    /* Vine sway effect */
-    .swaying {
-      animation: gentle-sway 60s ease-in-out infinite; /* 60 seconds for one full left-right cycle */
     }
     
     .fade-bottom {
@@ -494,7 +478,6 @@ function animateVines() {
 
       vine.style.top = `${vineOffset}px`;
       vine.style.opacity = 0.8;
-      vine.classList.add('swaying');
     }
   });
 }
