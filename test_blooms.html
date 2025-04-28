@@ -589,27 +589,18 @@ function animateBlooms() {
 
 /* 🌼 Fade In Bloom Items */
 document.addEventListener('DOMContentLoaded', () => {
-  const bloomGroups = document.querySelectorAll('.bloom');
-  const sections = document.querySelectorAll('.scroll-section'); // <-- Important!
+  const bloomItems = document.querySelectorAll('.bloom-item');
 
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const sectionId = entry.target.id;
-        const matchingBloom = document.querySelector(`.bloom[data-attach="${sectionId}"]`);
-
-        if (matchingBloom) {
-          const items = matchingBloom.querySelectorAll('.bloom-item');
-          items.forEach((item, idx) => {
-            setTimeout(() => item.classList.add('visible'), idx * 300);
-          });
-        }
+        entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.2 });
 
-  sections.forEach(section => {
-    observer.observe(section);
+  bloomItems.forEach(item => {
+    observer.observe(item);
   });
 });
 
