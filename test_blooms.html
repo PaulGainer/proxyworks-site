@@ -589,17 +589,23 @@ function animateBlooms() {
 
 /* 🌼 Fade In Bloom Items */
 document.addEventListener('DOMContentLoaded', () => {
-  const bloomItems = document.querySelectorAll('.bloom-item');
+  const bloomGroups = document.querySelectorAll('.bloom');
 
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        const bloom = entry.target.querySelector('.bloom');
+        if (bloom) {
+          const items = bloom.querySelectorAll('.bloom-item');
+          items.forEach((item, idx) => {
+            setTimeout(() => item.classList.add('visible'), idx * 300);
+          });
+        }
       }
     });
-  }, { threshold: 0.2 });
+  }, { threshold: 0.3 });
 
-  bloomItems.forEach(item => observer.observe(item));
+  sections.forEach(section => observer.observe(section));
 });
 
 /* 🌼 Hook into scroll and load */
