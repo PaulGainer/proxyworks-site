@@ -1,94 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ProxyWorks - Vine Debug (Fixed Offsets)</title>
-
+  <meta charset="UTF-8">
+  <title>Vine Direct Test</title>
   <style>
-    :root {
-      --brand-bg: #101f24;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      background: #eef3f5; /* Light gray */
-      color: var(--brand-bg);
-      font-family: system-ui, sans-serif;
-      overflow-x: hidden;
-      position: relative;
+      background: #eef3f5;
+      margin: 0;
+      height: 3000px;
     }
-
-    .vine-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 5;
-    }
-
     .vine {
       position: absolute;
+      top: 200px;
       left: 50%;
       transform: translateX(-50%);
-      width: 1000px;
-      max-width: 100%;
+      width: 500px;
       opacity: 1;
+      z-index: 9999;
+      background: rgba(255,0,0,0.1); /* light red debug */
     }
-
     .vine img {
       width: 100%;
       height: auto;
-      /* background: rgba(255, 0, 0, 0.1); /* Light red background */
-      /* filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); */
-    }
-
-    .fade-bottom {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      pointer-events: none;
-      background: linear-gradient(to bottom, rgba(238,243,245,0) 0%, #eef3f5 100%);
-      z-index: 6;
-    }
-
-    .scroll-space {
-      position: relative;
-      z-index: 10;
-      padding-top: 0;
-    }
-
-    .spacer {
-      height: 6000px;
-      background: linear-gradient(#eef3f5, #e0e4e7);
+      display: block;
     }
   </style>
 </head>
-
 <body>
 
-<!-- Vine Layer -->
-<div class="vine-layer">
-  <div class="vine" style="top: 300px;"><img src="images/vines.svg" alt="Vine 1"></div>
-  <div class="vine" style="top: 1200px;"><img src="images/vines.svg" alt="Vine 2"></div>
-  <div class="vine" style="top: 2100px;"><img src="images/vines.svg" alt="Vine 3"></div>
+<div class="vine">
+  <img src="images/vines.svg" alt="Vine Test">
 </div>
-
-<!-- Content -->
-<div class="scroll-space">
-  <div class="spacer"></div>
-</div>
-
-<div class="fade-bottom"></div>
 
 </body>
 </html>
