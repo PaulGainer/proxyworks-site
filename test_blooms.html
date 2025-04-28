@@ -275,9 +275,13 @@
       will-change: opacity, transform;
     }
 
-    .fade-in-heading.visible,
-    .fade-in-paragraph.visible {
+    .fade-in-heading.visible {
       opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .fade-in-paragraph.visible {
+      opacity: 0.85;
       transform: translateY(0);
     }
 
@@ -290,7 +294,7 @@
     .scroll-section p {
       font-size: 1.25rem;
       max-width: 700px;
-      opacity: 0.85;
+/*       opacity: 0.85; */
     }
 
     /* ───── FOOTER ───── */
