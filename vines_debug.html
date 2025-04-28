@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ProxyWorks - Vine Debug Diagnostic</title>
+  <title>ProxyWorks - Vine Debug No Clip</title>
 
   <style>
     :root {
@@ -17,16 +17,15 @@
     }
 
     body {
-      background: #eef3f5; /* 🔥 Light gray instead of pure white */
+      background: #eef3f5; /* Light gray */
       color: var(--brand-bg);
       font-family: system-ui, sans-serif;
       overflow-x: hidden;
       position: relative;
     }
 
-    /* ✨ Vine Layer */
     .vine-layer {
-      position: absolute; /* 🔥 Absolute, scrolls naturally */
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
@@ -41,17 +40,16 @@
       transform: translateX(-50%);
       width: 1000px;
       max-width: 100%;
-      opacity: 0.9;
+      opacity: 1;
     }
 
     .vine img {
       width: 100%;
       height: auto;
-      background: rgba(255, 0, 0, 0.1); /* 🔥 Light red behind vines (debug) */
-      filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.2)); /* Stronger contrast shadow */
+      background: rgba(255, 0, 0, 0.1); /* Light red background for visibility */
+      filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3));
     }
 
-    /* ✨ Fade Bottom */
     .fade-bottom {
       position: fixed;
       bottom: 0;
@@ -63,10 +61,9 @@
       z-index: 6;
     }
 
-    /* ✨ Scroll Space */
     .scroll-space {
       position: relative;
-      z-index: 10; /* Above vines */
+      z-index: 10;
       padding-top: 0;
     }
 
@@ -79,71 +76,17 @@
 
 <body>
 
-<!-- Vine Layer Under Content -->
 <div class="vine-layer">
   <div class="vine" style="top: 800px;"><img src="images/vines.svg" alt="Vine 1"></div>
   <div class="vine" style="top: 1800px;"><img src="images/vines.svg" alt="Vine 2"></div>
   <div class="vine" style="top: 2800px;"><img src="images/vines.svg" alt="Vine 3"></div>
 </div>
 
-<!-- Content -->
 <div class="scroll-space">
-  <div class="spacer"></div> <!-- Big scrollable area -->
+  <div class="spacer"></div>
 </div>
 
-<!-- Fade overlay only on vines -->
 <div class="fade-bottom"></div>
-
-<!-- Scripts -->
-<script>
-  /********************************************************************
-   * Vine Grow Reveal Logic
-   ********************************************************************/
-  const vines = document.querySelectorAll('.vine');
-  const vineData = new Map();
-
-  vines.forEach(vine => {
-    vineData.set(vine, { current: 0, target: 0 });
-  });
-
-  function updateVineTargets() {
-    vines.forEach(vine => {
-      const vineRect = vine.getBoundingClientRect();
-      const vineHeight = vineRect.height || 1;
-      const visibleTop = Math.max(0, window.innerHeight - vineRect.top);
-      const visibleHeight = Math.min(visibleTop, vineHeight);
-
-      let ratio = visibleHeight / vineHeight;
-      ratio = Math.max(0, Math.min(1, ratio));
-
-      vineData.get(vine).target = ratio;
-    });
-  }
-
-  function animateVines() {
-    vines.forEach(vine => {
-      const data = vineData.get(vine);
-      data.current += (data.target - data.current) * 0.04; // smooth slow grow
-      const reveal = Math.max(0, 100 - data.current * 100);
-      vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
-    });
-  }
-
-  function animate() {
-    animateVines();
-    requestAnimationFrame(animate);
-  }
-
-  /********************************************************************
-   * Setup
-   ********************************************************************/
-  window.addEventListener('scroll', updateVineTargets, { passive: true });
-  window.addEventListener('resize', updateVineTargets);
-  window.addEventListener('load', () => {
-    updateVineTargets();
-    animate();
-  });
-</script>
 
 </body>
 </html>
