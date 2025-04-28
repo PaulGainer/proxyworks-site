@@ -625,6 +625,7 @@ function resizeCanvas() {
 }
 
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', animateVines);
 window.addEventListener('scroll', () => { onScroll(); animateVines(); }, { passive: true });
 window.addEventListener('load', () => {
   panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
