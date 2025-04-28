@@ -558,7 +558,26 @@ function drawGrid() {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-  /* 🌿 Animate Vines */
+//   /* 🌿 Animate Vines */
+// function animateVines() {
+//   const vines = document.querySelectorAll('.vine');
+//   vines.forEach(vine => {
+//     const targetId = vine.dataset.attach;
+//     const targetSection = document.getElementById(targetId);
+//     if (targetSection) {
+//       const rect = targetSection.getBoundingClientRect();
+//       const absoluteTop = window.scrollY + rect.top;
+//       const sectionHeight = rect.height;
+
+//       // Position vine slightly below heading (e.g., 13% down the section)
+//       const vineOffset = absoluteTop + sectionHeight * 0.13;
+
+//       vine.style.top = `${vineOffset}px`;
+//       vine.style.opacity = 1;
+//     }
+//   });
+// }
+
 function animateVines() {
   const vines = document.querySelectorAll('.vine');
   vines.forEach(vine => {
@@ -566,14 +585,17 @@ function animateVines() {
     const targetSection = document.getElementById(targetId);
     if (targetSection) {
       const rect = targetSection.getBoundingClientRect();
-      const absoluteTop = window.scrollY + rect.top;
+      const scrollTop = window.scrollY;
+      const sectionTop = scrollTop + rect.top;
       const sectionHeight = rect.height;
 
-      // Position vine slightly below heading (e.g., 13% down the section)
-      const vineOffset = absoluteTop + sectionHeight * 0.13;
-
+      const vineOffset = sectionTop + sectionHeight * 0.13; // Still 13% but based on live size
       vine.style.top = `${vineOffset}px`;
-      vine.style.opacity = 1;
+
+      const bloom = vine.nextElementSibling;
+      if (bloom && bloom.classList.contains('bloom')) {
+        bloom.style.top = `${vineOffset}px`;
+      }
     }
   });
 }
