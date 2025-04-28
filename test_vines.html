@@ -157,6 +157,20 @@
       transform: scaleX(-1);
     }
 
+    @keyframes gentle-sway {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(2px); /* or 1px if you want it even subtler */
+      }
+    }
+    
+    /* Vine sway effect */
+    .vine.swaying {
+      animation: gentle-sway 60s ease-in-out infinite; /* 60 seconds for one full left-right cycle */
+    }
+    
     .fade-bottom {
       position: fixed;
       bottom: 0;
@@ -478,6 +492,7 @@ function animateVines() {
 
       vine.style.top = `${vineOffset}px`;
       vine.style.opacity = 0.8;
+      vine.classList.add('swaying');
     }
   });
 }
