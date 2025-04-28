@@ -243,6 +243,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.8s ease, transform 0.8s ease;
+      z-index: 10;
     }
 
     footer.visible {
@@ -412,16 +413,16 @@ function onScroll() {
 }
 
 /* 🌿 Vine Grow */
-const vines = document.querySelectorAll('.vine');
-function animateVines() {
-  vines.forEach(vine => {
-    const rect = vine.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const center = rect.top + rect.height / 2;
-    const visibleRatio = Math.max(0, Math.min(1, 1 - Math.abs(center - viewportHeight / 2) / (viewportHeight / 2)));
-    vine.style.clipPath = `inset(0 0 ${(1 - visibleRatio) * 100}% 0)`;
-  });
-}
+// const vines = document.querySelectorAll('.vine');
+// function animateVines() {
+//   vines.forEach(vine => {
+//     const rect = vine.getBoundingClientRect();
+//     const viewportHeight = window.innerHeight;
+//     const center = rect.top + rect.height / 2;
+//     const visibleRatio = Math.max(0, Math.min(1, 1 - Math.abs(center - viewportHeight / 2) / (viewportHeight / 2)));
+//     vine.style.clipPath = `inset(0 0 ${(1 - visibleRatio) * 100}% 0)`;
+//   });
+// }
 
 /* 🎬 Section Fade */
 if ('IntersectionObserver' in window) {
@@ -476,7 +477,7 @@ function drawGrid() {
 
 function animate() {
   drawGrid();
-  animateVines();
+  // animateVines();
   requestAnimationFrame(animate);
 }
 
