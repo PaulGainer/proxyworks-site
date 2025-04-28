@@ -126,41 +126,54 @@
       animation: breathe 8s ease-in-out infinite;
     }
 
-    /* ✨ Scroll Arrow */
-    .scroll-arrow {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 20px;
-      animation: arrow-bob 2s infinite ease-in-out;
-      opacity: 1;
-      transition: opacity 0.5s ease;
+    /* ───── VINES ───── */
+    .vine-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
+      z-index: 5;
     }
 
-    .scroll-arrow svg {
-      width: 20px;
-      height: 20px;
-      fill: rgba(16, 31, 36, 0.8);
-      filter: drop-shadow(0 0 8px rgba(100, 200, 255, 0.4));
+    .vine {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      max-width: 100%;
+      opacity: 0.8;
     }
 
-    @keyframes arrow-bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
+    .vine img {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(4px 4px 0 rgb(207, 210, 211));
     }
 
-    .scroll-arrow.hidden {
-      opacity: 0;
+    .mirror-horizontal {
+      transform: scaleX(-1);
+    }
+
+    .fade-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
+      pointer-events: none;
+      z-index: 6;
     }
 
     /* ───── CONTENT ───── */
     .content {
       background: #ffffff;
       color: var(--brand-bg);
-      padding-top: var(--hero-height-desktop);
       position: relative;
       z-index: 10;
+      padding-top: var(--hero-height-desktop);
     }
 
     @media (max-width: 768px) {
@@ -187,7 +200,6 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
     }
 
     @media (max-width: 768px) {
@@ -221,43 +233,6 @@
       opacity: 0.85;
     }
 
-    /* ───── VINES ───── */
-    .vine-overlay {
-      position: absolute;
-      top: 190px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 1000px;
-      max-width: 100%;
-      opacity: 0.8;
-      pointer-events: none;
-      z-index: 5;
-      overflow: hidden;
-    }
-
-    .vine-overlay img {
-      width: 100%;
-      height: auto;
-      filter: drop-shadow(4px 4px 0 rgb(207, 210, 211));
-    }
-
-    .mirror-horiztonal {
-      -webkit-transform: scaleX(-1);
-      transform: scaleX(-1);
-    }
-
-    /* ✨ Fade-bottom mask */
-    .fade-bottom {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
-      pointer-events: none;
-      z-index: 6;
-    }
-
     /* ───── FOOTER ───── */
     footer {
       text-align: center;
@@ -274,12 +249,47 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* ───── SCROLL ARROW ───── */
+    .scroll-arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      animation: arrow-bob 2s infinite ease-in-out;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .scroll-arrow svg {
+      width: 20px;
+      height: 20px;
+      fill: rgba(16,31,36,0.8);
+      filter: drop-shadow(0 0 8px rgba(100,200,255,0.4));
+    }
+
+    @keyframes arrow-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    .scroll-arrow.hidden {
+      opacity: 0;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- ✨ HERO Section -->
+<!-- ✨ VINES -->
+<div class="vine-layer">
+  <div class="vine" style="top: 1180px;"><img src="images/vines.svg"></div>
+  <div class="vine" style="top: 2480px;"><img class="mirror-horizontal" src="images/vines.svg"></div>
+  <div class="vine" style="top: 3780px;"><img src="images/vines.svg"></div>
+</div>
+
+<!-- ✨ HERO -->
 <section class="hero">
   <canvas id="grid-canvas"></canvas>
   <div class="scene" id="scene">
@@ -293,18 +303,15 @@
   </div>
 </section>
 
-<!-- ✨ CONTENT Section -->
+<!-- ✨ CONTENT -->
 <section class="content">
   <div class="scroll-section hero-section">
     <div class="scroll-arrow" id="scroll-arrow">
-      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
     </div>
   </div>
 
   <div class="scroll-section">
-    <div class="vine-overlay">
-      <img src="images/vines.svg" alt="Vines"/>
-    </div>
     <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
     <p class="fade-in-paragraph">
       ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.
@@ -312,19 +319,13 @@
   </div>
 
   <div class="scroll-section">
-    <div class="vine-overlay">
-      <img class="mirror-horiztonal" src="images/vines.svg" alt="Vines" />
-    </div>
     <h2 class="fade-in-heading">The Future of Storytelling</h2>
     <p class="fade-in-paragraph">
-      Powered by dynamic AI storytelling, ProxyWorks worlds grow, change, and react with authentic narrative depth.
+      Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.
     </p>
   </div>
 
   <div class="scroll-section">
-    <div class="vine-overlay">
-      <img src="images/vines.svg" alt="Vines"/>
-    </div>
     <h2 class="fade-in-heading">Your Invisible Gamesmaster</h2>
     <p class="fade-in-paragraph">
       ProxyWorks dynamically crafts worlds, characters, and plots — weaving new stories from your every move.
@@ -346,28 +347,31 @@
   ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
 </footer>
 
-<!-- ✨ FADE-BOTTOM overlay -->
+<!-- ✨ FADE BOTTOM -->
 <div class="fade-bottom"></div>
 
 <!-- ✨ SCRIPTS -->
 <script>
-/* Scroll Arrow */
+/* 🌀 Scroll Arrow */
 const scrollArrow = document.getElementById('scroll-arrow');
 window.addEventListener('scroll', () => {
   scrollArrow.classList.toggle('hidden', window.scrollY > 10);
 });
 
-/* Hero Rotation */
+/* 🎡 Hero Carousel */
 const ring = document.getElementById('ring');
 const panels = [...ring.children];
-const slice = 360 / panels.length;
-const sections = document.querySelectorAll('.scroll-section');
+const PANEL_COUNT = panels.length;
+const slice = 360 / PANEL_COUNT;
+const RADIUS = 420;
 let yaw = 0;
 let currentIndex = -1;
+const sections = document.querySelectorAll('.scroll-section');
+const footer = document.querySelector('footer');
 
 panels.forEach((p, i) => p.dataset.base = slice * i);
 
-function renderRing() {
+function render() {
   ring.style.transform = `rotateY(${yaw}deg)`;
   panels.forEach(p => {
     const base = +p.dataset.base;
@@ -376,18 +380,20 @@ function renderRing() {
     const vis = Math.max(0, Math.cos(rad)) ** 2;
     const scl = 0.3 + (0.85 - 0.3) * vis;
     p.style.opacity = vis;
-    p.style.transform = `rotateY(${base}deg) translateZ(420px) scale(${scl})`;
+    p.style.transform = `rotateY(${base}deg) translateZ(${RADIUS}px) scale(${scl})`;
     p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
   });
   panels
-    .map(p => ({panel: p, depth: Math.cos((+p.dataset.base + yaw) * Math.PI/180)}))
-    .sort((a,b) => a.depth - b.depth)
+    .map(p => ({ panel: p, depth: Math.cos((+p.dataset.base + yaw) * Math.PI / 180) }))
+    .sort((a, b) => a.depth - b.depth)
     .forEach(o => ring.appendChild(o.panel));
 }
 
 function onScroll() {
   const centerY = window.scrollY + window.innerHeight / 2;
-  let closestIndex = 0, closestDistance = Infinity;
+  let closestIndex = 0;
+  let closestDistance = Infinity;
+
   sections.forEach((section, idx) => {
     const rect = section.getBoundingClientRect();
     const sectionCenter = window.scrollY + rect.top + rect.height / 2;
@@ -397,72 +403,55 @@ function onScroll() {
       closestIndex = idx;
     }
   });
+
   if (closestIndex !== currentIndex) {
     currentIndex = closestIndex;
     yaw = -slice * currentIndex;
-    renderRing();
+    render();
   }
 }
 
-/* Vines grow */
-const vines = document.querySelectorAll('.vine-overlay');
-const vineData = new Map();
-vines.forEach(vine => vineData.set(vine, {current: 0, target: 0}));
-
-function updateVineTargets() {
-  vines.forEach(vine => {
-    const section = vine.closest('.scroll-section');
-    if (!section) return;
-    const rect = section.getBoundingClientRect();
-    const sectionHeight = rect.height;
-    const visibleTop = Math.max(0, window.innerHeight - rect.top);
-    const visibleHeight = Math.min(visibleTop, sectionHeight);
-    let ratio = visibleHeight / sectionHeight;
-    ratio = Math.max(0, Math.min(1, ratio));
-    vineData.get(vine).target = ratio;
-  });
-}
-
+/* 🌿 Vine Grow */
+const vines = document.querySelectorAll('.vine');
 function animateVines() {
   vines.forEach(vine => {
-    const data = vineData.get(vine);
-    data.current += (data.target - data.current) * 0.06;
-    const reveal = Math.max(0, 100 - data.current * 100);
-    vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
+    const rect = vine.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const center = rect.top + rect.height / 2;
+    const visibleRatio = Math.max(0, Math.min(1, 1 - Math.abs(center - viewportHeight / 2) / (viewportHeight / 2)));
+    vine.style.clipPath = `inset(0 0 ${(1 - visibleRatio) * 100}% 0)`;
   });
 }
 
-/* Intersection Observer */
-const footer = document.querySelector('footer');
-
+/* 🎬 Section Fade */
 if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const heading = entry.target.querySelector('.fade-in-heading');
-        const paragraph = entry.target.querySelector('.fade-in-paragraph');
-        if (heading) heading.classList.add('visible');
-        if (paragraph) setTimeout(() => paragraph.classList.add('visible'), 300);
+        entry.target.querySelector('.fade-in-heading')?.classList.add('visible');
+        setTimeout(() => entry.target.querySelector('.fade-in-paragraph')?.classList.add('visible'), 300);
       }
     });
-  }, {threshold: 0.2});
+  }, { threshold: 0.2 });
+
   sections.forEach(section => observer.observe(section));
-  
+
   const footerObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) footer.classList.add('visible');
     });
-  }, {threshold: 0.1});
+  }, { threshold: 0.1 });
   footerObserver.observe(footer);
 }
 
-/* Grid background */
+/* ✨ Grid */
 const canvas = document.getElementById('grid-canvas');
 const ctx = canvas.getContext('2d');
-let offset = 0, drift = 0;
+let offset = 0;
+let drift = 0;
 
 function drawGrid() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "rgba(255,255,255,0.05)";
   ctx.lineWidth = 1;
   const spacing = 40;
@@ -475,12 +464,13 @@ function drawGrid() {
   for (let y = -spacing + ((offset + drift) % spacing); y < canvas.height; y += spacing) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
   }
-  const g = ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,Math.min(canvas.width,canvas.height)*0.4);
+
+  const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.min(canvas.width, canvas.height) * 0.4);
   g.addColorStop(0, "rgba(16,31,36,0)");
   g.addColorStop(1, "rgba(16,31,36,1)");
   ctx.fillStyle = g;
   ctx.globalCompositeOperation = 'destination-in';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.globalCompositeOperation = 'source-over';
 }
 
@@ -490,23 +480,17 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-/* Init */
+/* 🚀 Init */
 function resizeCanvas() {
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 }
 
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('scroll', () => {
-  onScroll();
-  updateVineTargets();
-  animateVines();
-}, { passive: true });
-
+window.addEventListener('scroll', () => { onScroll(); animateVines(); }, { passive: true });
 window.addEventListener('load', () => {
   panels.forEach((panel, idx) => setTimeout(() => panel.classList.add('visible'), idx * 150));
   onScroll();
-  updateVineTargets();
   resizeCanvas();
   animate();
 });
