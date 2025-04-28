@@ -417,7 +417,7 @@ if ('IntersectionObserver' in window) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.querySelector('.fade-in-heading')?.classList.add('visible');
-        setTimeout(() => entry.target.querySelector('.fade-in-paragraph')?.classList.add('visible'), 300);
+        setTimeout(() => entry.target.querySelector('.fade-in-paragraph')?.classList.add('visible'), 600);
       }
     });
   }, { threshold: 0.2 });
