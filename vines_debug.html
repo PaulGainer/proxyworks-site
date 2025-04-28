@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ProxyWorks - Full Vine Corrected Version</title>
+  <meta name="description" content="ProxyWorks – AI-powered storytelling systems for tabletop roleplaying games." />
+  <meta name="author" content="ProxyWorks Ltd" />
+  <title>ProxyWorks</title>
 
   <style>
     :root {
@@ -22,9 +24,10 @@
     body {
       background: #eef3f5;
       color: var(--brand-bg);
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                   "Open Sans", "Helvetica Neue", sans-serif;
       overflow-x: hidden;
-      position: relative;
     }
 
     /* ✨ HERO SECTION */
@@ -34,11 +37,12 @@
       left: 0;
       width: 100%;
       height: var(--hero-height-desktop);
-      z-index: 100;
       background: var(--brand-bg);
+      z-index: 100;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
 
     @media (max-width: 768px) {
@@ -102,6 +106,15 @@
       pointer-events: none;
     }
 
+    .breathing img {
+      animation: breathe 8s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
     /* ✨ VINE LAYER */
     .vine-layer {
       position: absolute;
@@ -125,9 +138,14 @@
     .vine img {
       width: 100%;
       height: auto;
+      display: block;
     }
 
-    /* ✨ CONTENT */
+    .mirror-horizontal {
+      transform: scaleX(-1);
+    }
+
+    /* ✨ CONTENT SECTION */
     .content {
       position: relative;
       z-index: 10;
@@ -153,6 +171,7 @@
     .scroll-section h2 {
       font-size: 2.5rem;
       margin-bottom: 12px;
+      font-weight: 600;
     }
 
     .scroll-section p {
@@ -194,37 +213,37 @@
 
 <body>
 
-<!-- Vines behind everything -->
+<!-- VINE LAYER -->
 <div class="vine-layer">
-  <div class="vine" style="top: 300px;"><img src="images/vines.svg" alt="Vine 1"></div>
-  <div class="vine" style="top: 1400px;"><img src="images/vines.svg" alt="Vine 2"></div>
-  <div class="vine" style="top: 2500px;"><img src="images/vines.svg" alt="Vine 3"></div>
+  <div class="vine" style="top: 1180px;"><img src="images/vines.svg" alt="Vine 1"></div>
+  <div class="vine" style="top: 2480px;"><img class="mirror-horizontal" src="images/vines.svg" alt="Vine 2"></div>
+  <div class="vine" style="top: 3780px;"><img src="images/vines.svg" alt="Vine 3"></div>
 </div>
 
-<!-- Hero Panel -->
+<!-- HERO SECTION -->
 <section class="hero">
   <canvas id="grid-canvas"></canvas>
   <div class="scene" id="scene">
     <div class="ring" id="ring">
       <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" /></div></div>
-      <div class="panel"><div class="image-container"><img src="images/architect.png" alt="Creation" /></div></div>
-      <div class="panel"><div class="image-container"><img src="images/narration.png" alt="Vision" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/architect.png" alt="Architect" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/narration.png" alt="Narration" /></div></div>
       <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="Gamesmaster" /></div></div>
       <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Journey" /></div></div>
     </div>
   </div>
 </section>
 
-<!-- Content Scroll -->
+<!-- CONTENT -->
 <section class="content">
   <div class="scroll-section">
     <h2>Engineering Intelligent Worlds</h2>
     <p>ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.</p>
   </div>
-  
+
   <div class="scroll-section">
     <h2>The Future of Storytelling</h2>
-    <p>Powered by dynamic AI storytelling, ProxyWorks worlds grow and react with authentic narrative depth.</p>
+    <p>ProxyWorks worlds grow and react with authentic narrative depth through dynamic AI storytelling.</p>
   </div>
 
   <div class="scroll-section">
@@ -240,26 +259,36 @@
   <div style="height: 300px;"></div>
 </section>
 
-<!-- Footer -->
+<!-- FOOTER -->
 <footer>
   ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
 </footer>
 
-<!-- Fade bottom to vines only -->
+<!-- FADE BOTTOM -->
 <div class="fade-bottom"></div>
 
-<!-- SCRIPTS -->
+<!-- ✨ SCRIPTS -->
 <script>
+  const ring = document.getElementById('ring');
+  const panels = [...ring.children];
+  const sections = document.querySelectorAll('.scroll-section');
+  const vines = document.querySelectorAll('.vine');
   const canvas = document.getElementById('grid-canvas');
   const ctx = canvas.getContext('2d');
+  const footer = document.querySelector('footer');
   let offset = 0, drift = 0;
-
-  const vines = document.querySelectorAll('.vine');
+  let yaw = 0;
+  let currentIndex = -1;
+  const slice = 360 / panels.length;
   const vineData = new Map();
 
-  vines.forEach(vine => {
-    vineData.set(vine, { current: 0, target: 0 });
-  });
+  panels.forEach((p, i) => p.dataset.base = slice * i);
+  vines.forEach(vine => vineData.set(vine, { current: 0, target: 0 }));
+
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
 
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -285,50 +314,81 @@
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  function updateVineTargets() {
+  function renderCarousel() {
+    ring.style.transform = `rotateY(${yaw}deg)`;
+    panels.forEach(p => {
+      const base = +p.dataset.base;
+      const rel = (base + yaw) % 360;
+      const rad = rel * Math.PI / 180;
+      const vis = Math.max(0, Math.cos(rad)) ** 2;
+      const scl = 0.3 + (0.85 - 0.3) * vis;
+      p.style.opacity = vis;
+      p.style.transform = `rotateY(${base}deg) translateZ(420px) scale(${scl})`;
+      p.classList.toggle('breathing', Math.abs(rel) < 20 || Math.abs(rel - 360) < 20);
+    });
+    panels.sort((a, b) => {
+      const da = Math.cos((+a.dataset.base + yaw) * Math.PI/180);
+      const db = Math.cos((+b.dataset.base + yaw) * Math.PI/180);
+      return da - db;
+    }).forEach(p => ring.appendChild(p));
+  }
+
+  function updateVines() {
     vines.forEach(vine => {
-      const vineRect = vine.getBoundingClientRect();
-      const vineHeight = vineRect.height || 1;
-      const visibleTop = Math.max(0, window.innerHeight - vineRect.top);
+      const rect = vine.getBoundingClientRect();
+      const vineHeight = rect.height || 1;
+      const visibleTop = Math.max(0, window.innerHeight - rect.top);
       const visibleHeight = Math.min(visibleTop, vineHeight);
 
       let ratio = visibleHeight / vineHeight;
       ratio = Math.max(0, Math.min(1, ratio));
-
-      vineData.get(vine).target = ratio;
-    });
-  }
-
-  function animateVines() {
-    vines.forEach(vine => {
       const data = vineData.get(vine);
-      data.current += (data.target - data.current) * 0.05; // Smoother slow interpolation
+      data.target = ratio;
+      data.current += (data.target - data.current) * 0.05;
       const reveal = Math.max(0, 100 - data.current * 100);
       vine.style.clipPath = `inset(0 0 ${reveal}% 0)`;
     });
   }
 
-  function animate() {
-    drawGrid();
-    animateVines();
-    requestAnimationFrame(animate);
+  function onScroll() {
+    const centerY = window.scrollY + window.innerHeight / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    sections.forEach((s, i) => {
+      const rect = s.getBoundingClientRect();
+      const center = window.scrollY + rect.top + rect.height/2;
+      const dist = Math.abs(centerY - center);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = i;
+      }
+    });
+    if (closest !== currentIndex) {
+      currentIndex = closest;
+      yaw = -slice * currentIndex;
+      renderCarousel();
+    }
   }
 
-  function resizeCanvas() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+  function animate() {
+    drawGrid();
+    updateVines();
+    requestAnimationFrame(animate);
   }
 
   window.addEventListener('resize', resizeCanvas);
   window.addEventListener('scroll', () => {
-    updateVineTargets();
+    onScroll();
+    updateVines();
   }, { passive: true });
 
   window.addEventListener('load', () => {
     resizeCanvas();
-    updateVineTargets();
+    renderCarousel();
     animate();
+    updateVines();
   });
+
 </script>
 
 </body>
