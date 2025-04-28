@@ -610,6 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
 /* 🌼 Hook into scroll and load */
 window.addEventListener('scroll', animateBlooms, { passive: true });
 window.addEventListener('load', animateBlooms);
+window.addEventListener('resize', animateBlooms);
+
   
 function animate() {
   drawGrid();
