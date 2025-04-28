@@ -21,10 +21,12 @@
       color: var(--brand-bg);
       font-family: system-ui, sans-serif;
       overflow-x: hidden;
+      position: relative;
     }
 
+    /* ✨ Vine Layer */
     .vine-layer {
-      position: fixed;
+      position: absolute; /* 🔥 not fixed! */
       top: 0;
       left: 0;
       width: 100%;
@@ -39,7 +41,7 @@
       transform: translateX(-50%);
       width: 1000px;
       max-width: 100%;
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     .vine img {
@@ -48,6 +50,7 @@
       filter: drop-shadow(4px 4px 0 rgb(207, 210, 211));
     }
 
+    /* ✨ Fade Bottom */
     .fade-bottom {
       position: fixed;
       bottom: 0;
@@ -59,7 +62,14 @@
       z-index: 6;
     }
 
+    /* ✨ Scroll Space */
     .scroll-space {
+      position: relative;
+      z-index: 10; /* above vines */
+      padding-top: 0;
+    }
+
+    .spacer {
       height: 6000px;
       background: linear-gradient(#ffffff, #e9ecef);
     }
@@ -68,22 +78,25 @@
 
 <body>
 
-<!-- Vines layer -->
+<!-- Vine Layer Under Content -->
 <div class="vine-layer">
   <div class="vine" style="top: 800px;"><img src="images/vines.svg" alt="Vine 1"></div>
   <div class="vine" style="top: 1800px;"><img src="images/vines.svg" alt="Vine 2"></div>
   <div class="vine" style="top: 2800px;"><img src="images/vines.svg" alt="Vine 3"></div>
 </div>
 
-<!-- Scrollable background -->
-<div class="scroll-space"></div>
+<!-- Content -->
+<div class="scroll-space">
+  <div class="spacer"></div> <!-- Big scrollable area -->
+</div>
 
-<!-- Fade bottom -->
+<!-- Fade overlay only on vines -->
 <div class="fade-bottom"></div>
 
+<!-- Scripts -->
 <script>
   /********************************************************************
-   * Vine Reveal Logic
+   * Vine Grow Reveal Logic
    ********************************************************************/
   const vines = document.querySelectorAll('.vine');
   const vineData = new Map();
@@ -120,9 +133,11 @@
     requestAnimationFrame(animate);
   }
 
+  /********************************************************************
+   * Setup
+   ********************************************************************/
   window.addEventListener('scroll', updateVineTargets, { passive: true });
   window.addEventListener('resize', updateVineTargets);
-
   window.addEventListener('load', () => {
     updateVineTargets();
     animate();
