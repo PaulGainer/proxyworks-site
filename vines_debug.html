@@ -29,12 +29,6 @@
                    "Open Sans", "Helvetica Neue", sans-serif;
     }
 
-    .page-body {
-      position: relative;
-      z-index: 5; /* Lower than .fade-bottom */
-    }
-
-
     /* ───── HERO ───── */
     .hero {
       position: fixed;
@@ -163,14 +157,14 @@
     }
 
     .fade-bottom {
-      position: absolute;
+      position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 100px;
       background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%);
       pointer-events: none;
-      z-index: 20;
+      z-index: 6;
     }
 
     /* ───── CONTENT ───── */
@@ -287,70 +281,68 @@
 </head>
 
 <body>
-<div class="page-body">
-  <!-- ✨ VINES -->
-  <div class="vine-layer">
-    <div class="vine" style="top: 1180px;"><img src="images/vines.svg"></div>
-    <div class="vine" style="top: 2480px;"><img class="mirror-horizontal" src="images/vines.svg"></div>
-    <div class="vine" style="top: 3780px;"><img src="images/vines.svg"></div>
-  </div>
-  
-  <!-- ✨ HERO -->
-  <section class="hero">
-    <canvas id="grid-canvas"></canvas>
-    <div class="scene" id="scene">
-      <div class="ring" id="ring">
-        <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" /></div></div>
-        <div class="panel"><div class="image-container"><img src="images/architect.png" alt="Creation" /></div></div>
-        <div class="panel"><div class="image-container"><img src="images/narration.png" alt="Vision" /></div></div>
-        <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="Gamesmaster" /></div></div>
-        <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Journey" /></div></div>
-      </div>
-    </div>
-  </section>
-  
-  <!-- ✨ CONTENT -->
-  <section class="content">
-    <div class="scroll-section hero-section">
-      <div class="scroll-arrow" id="scroll-arrow">
-        <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
-      </div>
-    </div>
-  
-    <div class="scroll-section">
-      <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
-      <p class="fade-in-paragraph">
-        ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.
-      </p>
-    </div>
-  
-    <div class="scroll-section">
-      <h2 class="fade-in-heading">The Future of Storytelling</h2>
-      <p class="fade-in-paragraph">
-        Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.
-      </p>
-    </div>
-  
-    <div class="scroll-section">
-      <h2 class="fade-in-heading">Your Invisible Gamesmaster</h2>
-      <p class="fade-in-paragraph">
-        ProxyWorks dynamically crafts worlds, characters, and plots — weaving new stories from your every move.
-      </p>
-    </div>
-  
-    <div class="scroll-section">
-      <h2 class="fade-in-heading">Join the Journey</h2>
-      <p class="fade-in-paragraph">
-        Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.
-      </p>
-    </div>
-  
-    <div style="height: 300px;"></div>
-  </section>
-  
-  <!-- ✨ FADE BOTTOM -->
-  <div class="fade-bottom"></div>
+<!-- ✨ VINES -->
+<div class="vine-layer">
+  <div class="vine" style="top: 1180px;"><img src="images/vines.svg"></div>
+  <div class="vine" style="top: 2480px;"><img class="mirror-horizontal" src="images/vines.svg"></div>
+  <div class="vine" style="top: 3780px;"><img src="images/vines.svg"></div>
 </div>
+
+<!-- ✨ HERO -->
+<section class="hero">
+  <canvas id="grid-canvas"></canvas>
+  <div class="scene" id="scene">
+    <div class="ring" id="ring">
+      <div class="panel"><div class="image-container"><img src="images/logo.png" alt="Logo" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/architect.png" alt="Creation" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/narration.png" alt="Vision" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/gamesmaster.png" alt="Gamesmaster" /></div></div>
+      <div class="panel"><div class="image-container"><img src="images/journey.png" alt="Journey" /></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ✨ CONTENT -->
+<section class="content">
+  <div class="scroll-section hero-section">
+    <div class="scroll-arrow" id="scroll-arrow">
+      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">Engineering Intelligent Worlds</h2>
+    <p class="fade-in-paragraph">
+      ProxyWorks crafts living, breathing worlds — spaces that adapt, evolve, and respond to your every choice.
+    </p>
+  </div>
+
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">The Future of Storytelling</h2>
+    <p class="fade-in-paragraph">
+      Powered by dynamic AI storytelling, ProxyWorks worlds are more than static settings — they grow, change, and react with authentic narrative depth.
+    </p>
+  </div>
+
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">Your Invisible Gamesmaster</h2>
+    <p class="fade-in-paragraph">
+      ProxyWorks dynamically crafts worlds, characters, and plots — weaving new stories from your every move.
+    </p>
+  </div>
+
+  <div class="scroll-section">
+    <h2 class="fade-in-heading">Join the Journey</h2>
+    <p class="fade-in-paragraph">
+      Become part of a new era of tabletop storytelling. Stay close as our worlds awaken.
+    </p>
+  </div>
+
+  <div style="height: 300px;"></div>
+</section>
+
+<!-- ✨ FADE BOTTOM -->
+<div class="fade-bottom"></div>
   
 <!-- ✨ FOOTER -->
 <footer>
