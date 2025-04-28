@@ -343,14 +343,14 @@
   <div style="height: 300px;"></div>
 </section>
 
+<!-- ✨ FADE BOTTOM -->
+<div class="fade-bottom"></div>
+
 <!-- ✨ FOOTER -->
 <footer>
   ProxyWorks Ltd · Company Number: 16404818 · Registered in England and Wales
 </footer>
-
-<!-- ✨ FADE BOTTOM -->
-<div class="fade-bottom"></div>
-
+  
 <!-- ✨ SCRIPTS -->
 <script>
 /* 🌀 Scroll Arrow */
@@ -412,18 +412,6 @@ function onScroll() {
   }
 }
 
-/* 🌿 Vine Grow */
-// const vines = document.querySelectorAll('.vine');
-// function animateVines() {
-//   vines.forEach(vine => {
-//     const rect = vine.getBoundingClientRect();
-//     const viewportHeight = window.innerHeight;
-//     const center = rect.top + rect.height / 2;
-//     const visibleRatio = Math.max(0, Math.min(1, 1 - Math.abs(center - viewportHeight / 2) / (viewportHeight / 2)));
-//     vine.style.clipPath = `inset(0 0 ${(1 - visibleRatio) * 100}% 0)`;
-//   });
-// }
-
 /* 🎬 Section Fade */
 if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver(entries => {
@@ -477,7 +465,6 @@ function drawGrid() {
 
 function animate() {
   drawGrid();
-  // animateVines();
   requestAnimationFrame(animate);
 }
 
