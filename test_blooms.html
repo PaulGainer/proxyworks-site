@@ -156,7 +156,8 @@
     .mirror-horizontal {
       transform: scaleX(-1);
     }
-    
+
+     /* ───── BOTTOM FADE ───── */
     .fade-bottom {
       position: fixed;
       bottom: 0;
@@ -167,6 +168,61 @@
       pointer-events: none;
       z-index: 6;
     }
+
+     /* ───── BLOOMS ───── */
+    .bloom-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      z-index: 6; /* Above vines, below content */
+    }
+    
+    .bloom {
+      position: absolute;
+      width: 100%;
+    }
+    
+    .bloom-item {
+      position: absolute;
+      max-width: 280px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    
+    .bloom-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .bloom-icon {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 10px auto;
+    }
+    
+    .bloom-icon img,
+    .bloom-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .bloom-title {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--brand-bg);
+    }
+    
+    .bloom-text {
+      font-size: 1rem;
+      opacity: 0.8;
+      color: var(--brand-bg);
+    }
+
 
     /* ───── CONTENT ───── */
     .content {
@@ -297,6 +353,37 @@
   <div class="vine" data-attach="section-3"><img src="images/vines.svg"></div>
 </div>
 
+<!-- ✨ BLOOMS -->
+<div class="bloom-layer">
+  <div class="bloom" data-attach="section-1">
+    <div class="bloom-item" style="top: 200px; left: 30%;">
+      <div class="bloom-icon">
+        <img src="images/bloom_1.svg">
+      </div>
+      <h3 class="bloom-title">Persistent Memory</h3>
+      <p class="bloom-text">World events, relationships, and reputations persist across your campaign.</p>
+    </div>
+
+    <div class="bloom-item" style="top: 500px; right: 30%;">
+      <div class="bloom-icon">
+        <img src="images/bloom_1.svg">
+      </div>
+      <h3 class="bloom-title">Real Causality</h3>
+      <p class="bloom-text">Actions ripple through logical cause-effect chains shaping the world dynamically.</p>
+    </div>
+
+    <div class="bloom-item" style="top: 800px; left: 40%;">
+      <div class="bloom-icon">
+        <img src="images/bloom_1.svg">
+      </div>
+      <h3 class="bloom-title">Adaptive NPC Minds</h3>
+      <p class="bloom-text">NPCs evolve emotions, goals, and loyalties based on memories and player influence.</p>
+    </div>
+  </div>
+
+  <!-- (Later: Add blooms for section-2, section-3, etc.) -->
+</div>
+  
 <!-- ✨ HERO -->
 <section class="hero">
   <canvas id="grid-canvas"></canvas>
@@ -490,6 +577,39 @@ function animateVines() {
     }
   });
 }
+
+/* 🌼 Animate Blooms */
+function animateBlooms() {
+  const blooms = document.querySelectorAll('.bloom');
+  blooms.forEach(bloom => {
+    const targetId = bloom.dataset.attach;
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) {
+      const rect = targetSection.getBoundingClientRect();
+      const absoluteTop = window.scrollY + rect.top;
+      bloom.style.top = `${absoluteTop}px`;
+    }
+  });
+}
+
+/* 🌼 Fade In Bloom Items */
+document.addEventListener('DOMContentLoaded', () => {
+  const bloomItems = document.querySelectorAll('.bloom-item');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  bloomItems.forEach(item => observer.observe(item));
+});
+
+/* 🌼 Hook into scroll and load */
+window.addEventListener('scroll', animateBlooms, { passive: true });
+window.addEventListener('load', animateBlooms);
   
 function animate() {
   drawGrid();
