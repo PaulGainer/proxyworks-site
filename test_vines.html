@@ -462,30 +462,9 @@ function drawGrid() {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-//   /* 🌿 Animate Vines */
-// function animateVines() {
-//   const vines = document.querySelectorAll('.vine');
-//   vines.forEach(vine => {
-//     const targetId = vine.dataset.attach;
-//     const targetSection = document.getElementById(targetId);
-//     if (targetSection) {
-//       const rect = targetSection.getBoundingClientRect();
-//       const absoluteTop = window.scrollY + rect.top;
-//       const sectionHeight = rect.height;
-
-//       // Position vine slightly below heading (e.g., 13% down the section)
-//       const vineOffset = absoluteTop + sectionHeight * 0.13;
-
-//       vine.style.top = `${vineOffset}px`;
-//       vine.style.opacity = 0.8;
-//     }
-//   });
-// }
-
+  /* 🌿 Animate Vines */
 function animateVines() {
   const vines = document.querySelectorAll('.vine');
-  const parallaxStrength = 0.2; // 🎯 Vines will scroll 15% slower than page
-
   vines.forEach(vine => {
     const targetId = vine.dataset.attach;
     const targetSection = document.getElementById(targetId);
@@ -494,13 +473,11 @@ function animateVines() {
       const absoluteTop = window.scrollY + rect.top;
       const sectionHeight = rect.height;
 
+      // Position vine slightly below heading (e.g., 13% down the section)
       const vineOffset = absoluteTop + sectionHeight * 0.13;
 
-      // 🌀 Apply gentle parallax: subtract a small fraction of scrollY
-      const parallaxOffset = window.scrollY * parallaxStrength;
-
-      vine.style.top = `${vineOffset - parallaxOffset}px`;
-      vine.style.opacity = 1;
+      vine.style.top = `${vineOffset}px`;
+      vine.style.opacity = 0.8;
     }
   });
 }
