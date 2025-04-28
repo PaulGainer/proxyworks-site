@@ -141,8 +141,8 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      width: 900px;
-      max-width: 900px;
+      width: 850px;
+      max-width: 850px;
       opacity: 0;
       transition: opacity 0.6s ease;
     }
@@ -170,18 +170,14 @@
     }
 
      /* ───── BLOOMS ───── */
-    .bloom-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      pointer-events: none;
-      z-index: 6; /* Above vines, below content */
-    }
-    
     .bloom {
       position: absolute;
-      width: 900px;
+      width: 90%; /* Match vine width */
+      max-width: 850px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      top: 0;
     }
     
     .bloom-item {
@@ -349,12 +345,7 @@
 <!-- ✨ VINES -->
 <div class="vine-layer">
   <div id="vine-1" class="vine" data-attach="section-1"><img src="images/vines.svg"></div>
-  <div id="vine-2" class="vine" data-attach="section-2"><img class="mirror-horizontal" src="images/vines.svg"></div>
-  <div id="vine-3" class="vine" data-attach="section-3"><img src="images/vines.svg"></div>
-</div>
-
-<!-- ✨ BLOOMS -->
-<div class="bloom-layer">
+  
   <div class="bloom" data-attach="section-1">
     <div class="bloom-item" style="top: 200px; left: 180px;">
       <div class="bloom-icon">
@@ -380,9 +371,13 @@
       <p class="bloom-text">NPCs evolve emotions, goals, and loyalties based on memories and player influence.</p>
     </div>
   </div>
-
-  <!-- (Later: Add blooms for section-2, section-3, etc.) -->
+  
+  <div id="vine-2" class="vine" data-attach="section-2"><img class="mirror-horizontal" src="images/vines.svg"></div>
+  <div id="vine-3" class="vine" data-attach="section-3"><img src="images/vines.svg"></div>
 </div>
+
+
+
   
 <!-- ✨ HERO -->
 <section class="hero">
